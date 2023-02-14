@@ -1,40 +1,38 @@
-import { StyleSheet } from "react-native"
+import { StyleSheet, TouchableOpacity } from 'react-native';
+import styled from "styled-components/native"
 
-export const styles = StyleSheet.create({
+export const ContainerQueues = styled.View`
+  flex-direction: row;
+`;
 
-  containerQueue: {
-    flexDirection: 'row',
-  },
+export const QueueBox = styled.View`
+  flex: 1;
+  background-color: ${({theme}) => theme.COLORS.WHITE};
+  width: 100%;
+  height: 150px;
+  border-radius: ${({theme}) => theme.BORDER_RADIUS}px;
+  padding: 20px;
+`;
 
-  queue: {
-    flex: 1,
-    backgroundColor: '#fff',
-    width: '100%',
-    height: 150,
-    borderRadius: 5,
-    padding: 20,
-  },
+export const TextQueue = styled.Text`
+  font-size: ${({theme}) => theme.FONT_SIZE.LG}px;
+  color: ${({theme}) => theme.COLORS.BLACK_900};
+  font-family: ${({theme}) => theme.FONT_FAMILY.BOLD};
+`;
 
-  textQueue:{
-    fontSize: 20,
-    color: '#000',
-    fontWeight: 'bold',
-  },
+export const ButtonJoinQueue = styled(TouchableOpacity)`
+  background-color: ${({theme}) => theme.COLORS.BLUE};
+  width: 145px;
+  align-items: center;
+  justify-content: center;
+  margin-left: 15px;
+  border-radius: ${({theme}) => theme.BORDER_RADIUS}px;
+`;
 
-  JoinQueue: {
-    backgroundColor: '#37B2F6',
-    width: 145,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: 15,
-    borderRadius: 5,
-  },
-  
-  textButton:{
-    fontSize: 20,
-    color: '#fff',
-    textAlign: 'center',
-    padding:20,
-    fontWeight: 'bold',
-  }
-})
+export const TextButtonJoinQueue = styled.Text`
+  font-size: ${({theme}) => theme.FONT_SIZE.LG}px;
+  color: ${({theme}) => theme.COLORS.WHITE};
+  text-align: center;
+  font-family: ${({theme}) => theme.FONT_FAMILY.BOLD};
+  padding: 20px;
+`;

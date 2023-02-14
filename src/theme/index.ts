@@ -6,7 +6,7 @@ export default {
     GRAY_500: '#909090',
     GRAY_300: '#DBDBDB',
     GRAY_100: '#F0F0F0',
-    BLUE: '#2CAAC6',
+    BLUE: '#37B2F6',
     GREEN: '#1DB83F',
     RED: '#FF1010',
     YELLOW: '#F3D018',
@@ -23,5 +23,6 @@ export default {
     REGULAR: 'Poppins_400Regular',
     SEMIBOLD: 'Poppins_600SemiBold',
     BOLD: 'Poppins_700Bold'
-  } 
+  },
+  BORDER_RADIUS: 5
 }
