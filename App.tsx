@@ -3,6 +3,7 @@ import { StatusBar, View } from 'react-native';
 
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { Home } from './src/screens/Home/index';
+import { RegisterGame } from './src/screens/RegisterGame';
 import {useFonts, Poppins_400Regular, Poppins_600SemiBold, Poppins_700Bold, Poppins_800ExtraBold} from '@expo-google-fonts/poppins';
 import theme from './src/theme';
 import { Loading } from './src/Loading';
@@ -20,7 +21,7 @@ export default function App() {
           barStyle='light-content'
           backgroundColor="transparent"
           translucent/>
-      { fontsLoaded ? <Home/> : <Loading/>}     
+      { fontsLoaded ? <RegisterGame/> : <Loading/>}     
       </ThemeProvider>
     </>
   );

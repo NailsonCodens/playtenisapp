@@ -1,7 +1,7 @@
 
 import { View, Text, ScrollView } from 'react-native';
 import {Header} from '../../components/Header'
-import { styles } from './style';
+import { styles } from './styles';
 import { Court } from '../../components/Court';
 import { statusCourt } from '../../utils/statusCourt';
 import { colorsCourt } from '../../utils/colorsCourt';
