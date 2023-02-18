@@ -1,5 +1,6 @@
 import RNPickerSelect from 'react-native-picker-select';
 import { Container } from './styles';
+import theme from '../../theme';
 
 const pickerStyle = {
   inputIOS: {
@@ -8,7 +9,7 @@ const pickerStyle = {
     paddingHorizontal: 10,
     borderWidth: 1,
     borderColor: '#000',
-    borderRadius: 4,
+    borderRadius: theme.BORDER_RADIUS,
     color: 'black',
     width: '100%', 
     height: 52,
@@ -25,7 +26,7 @@ const pickerStyle = {
     paddingHorizontal: 10,
     borderWidth: 1,
     borderColor: '#000',
-    borderRadius: 4,
+    borderRadius: theme.BORDER_RADIUS,
     color: 'black',
     height: 52,
     fontFamily: "Poppins_700Bold" 

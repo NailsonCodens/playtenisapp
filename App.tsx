@@ -7,6 +7,7 @@ import { RegisterGame } from './src/screens/RegisterGame';
 import {useFonts, Poppins_400Regular, Poppins_600SemiBold, Poppins_700Bold, Poppins_800ExtraBold} from '@expo-google-fonts/poppins';
 import theme from './src/theme';
 import { Loading } from './src/Loading';
+import { Routes } from './src/routes/index';
 
 ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT)
 
@@ -21,7 +22,7 @@ export default function App() {
           barStyle='light-content'
           backgroundColor="transparent"
           translucent/>
-      { fontsLoaded ? <RegisterGame/> : <Loading/>}     
+      { fontsLoaded ? <Routes/> : <Loading/>}     
       </ThemeProvider>
     </>
   );

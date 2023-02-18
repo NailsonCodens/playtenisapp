@@ -1,62 +1,66 @@
 
-import { View, Text, ScrollView } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import {Header} from '../../components/Header'
-import { styles } from './styles';
+import { Container, ContainerScroll, Courts} from './styles';
 import { Court } from '../../components/Court';
-import { statusCourt } from '../../utils/statusCourt';
-import { colorsCourt } from '../../utils/colorsCourt';
 import { statusGame } from '../../utils/statusGame';
-import { Queue } from '../../components/Queue';
+import { Queue } from '../../components/Queue'
+import { api } from '../../services/api';
+import { useEffect, useState } from 'react';
+import { courtsType } from '../../dtos/courtsDTO';
+import { Alert } from 'react-native';
 
 export function Home (){
+
+  const navigatior = useNavigation();
+  const [courts, setCourts] = useState<courtsType[]>([]);
+
+  async function handleRegister(courtId: string){
+    const response = await api.get(`/games/game-court-current/${courtId}`);
+
+    const {game} = response.data;
+
+    if(game){
+      return Alert.alert('Quadras', 'Quadra ocupada. seleciona uma disponível ou entre na fila de espera');
+    }
+
+    const { status } = response.data.court;
+
+    if(status === 'off'){
+      return Alert.alert('Quadras', 'Esta quadra não está disponível');
+    }
+
+    navigatior.navigate('register', {courtId: courtId});
+  }
+
+  async function fetchCourts(){
+    const response = await api.get('courts');
+    setCourts(response.data.list)
+  }
+
+  useEffect(() => {
+    fetchCourts()
+  }, []);
+
   return(
-    <View style={styles.home}>
+    <Container>
       <Header/>
-      <ScrollView style={styles.containerFull}>
-        <View style={styles.containerCourts}>
-          <Court name="Quadra 1" 
-            statusCourt={statusCourt.available} 
-            colorCourt={colorsCourt.available}
-            statusGame={statusGame.available}
-          />        
-          <Court name="Quadra 2" 
-            statusCourt={statusCourt.inUse} 
-            colorCourt={colorsCourt.inUse}
-            statusGame={statusGame.start}
-          /> 
-          <Court name="Quadra 3" 
-            statusCourt={statusCourt.unavailable} 
-            colorCourt={colorsCourt.unavailable}
-            statusGame={statusGame.unavailable}
-          />    
-          <Court name="Quadra 4" 
-            statusCourt={statusCourt.available} 
-            colorCourt={colorsCourt.available}
-            statusGame={statusGame.available}
-          /> 
-          <Court name="Quadra 5" 
-            statusCourt={statusCourt.available} 
-            colorCourt={colorsCourt.available}
-            statusGame={statusGame.available}
-          />        
-          <Court name="Quadra 6" 
-            statusCourt={statusCourt.available} 
-            colorCourt={colorsCourt.available}
-            statusGame={statusGame.available}
-          />     
-          <Court name="Quadra 7" 
-            statusCourt={statusCourt.inUse} 
-            colorCourt={colorsCourt.inUse}
-            statusGame={statusGame.start}
-          />  
-          <Court name="Quadra 8" 
-            statusCourt={statusCourt.unavailable} 
-            colorCourt={colorsCourt.unavailable}
-            statusGame={statusGame.unavailable}          
-          />                                    
-        </View>
+      <ContainerScroll>
+        <Courts>
+          {
+            courts.map(court => (
+              <Court
+                key={court.id}
+                id={court.id}
+                name={court.name}
+                players={'dsadsad'}
+                onPress={() => handleRegister(court.id)}
+                />
+            ))
+          }                                      
+        </Courts>
         <Queue/>
-      </ScrollView>
-     </View>
+      </ContainerScroll>
+     </Container>
   )
 }
