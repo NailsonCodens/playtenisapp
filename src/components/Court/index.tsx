@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { TouchableOpacityProps, Text } from 'react-native';
+import { TouchableOpacityProps, Text, Alert } from 'react-native';
 import { useEffect, useState } from 'react';
 
 import { Container, CourtContainer, NameCourt, CourtImage, ContainerText, PlayersCourt, Icon } from './style';
@@ -70,9 +70,10 @@ export function Court ({id, name,...rest }: Props ){
 
     setGameCurrent(game);
 
+    game && game.players && setPlayers(game.players);
+
     addColorCourtBarAndStatusCourtBar(game, court);
     mutateDataCourt(game);
-    addStatusGame();
   }
 
   function addColorCourtBarAndStatusCourtBar(game: gamePropsDTO, court: courtPropsDTO){
@@ -114,17 +115,37 @@ export function Court ({id, name,...rest }: Props ){
       setStatusCourtBar(statusCourtText.inUse);
 
     }else{
-
       setStatusCourtBar(statusCourtText.inUse);
-      setStatusBarColorCourt(colorsCourt.inUse);  
-      if(game.time <= 15){
-        setStatusGameBar(statusGame.closeEnd);
-      }else if(game.time > 15 && game.time <= 70){
-        setStatusGameBar(statusGame.inProgress);
-      }else{
-        setStatusGameBar(statusGame.start);
-      }  
+      setStatusBarColorCourt(colorsCourt.inUse); 
+
+      changeStatusGame(game.time);
     }    
+  }
+
+  function changeStatusGame(time: number){
+    
+    if(time <= 16){
+      setStatusGameBar(statusGame.closeEnd);
+    }
+
+    if(time > 16 && time < 40){
+      setStatusGameBar(statusGame.inProgress);
+    }
+    
+    if(time >= 40){
+      setStatusGameBar(statusGame.start);
+    }    
+  }
+
+  function setStatusAvailableCourtAfterCounterResets(){
+    console.log('executou default status');
+    setStatusCourtBar(statusCourtText.available);
+    setStatusBarColorCourt(colorsCourt.available);  
+    setStatusGameBar(statusGame.available);
+  }
+
+  function sendRegisterScreenNextGameInQueue(){
+    Alert.alert('Enviar', 'Enviar para a tela de formulário onde o próximo da queue vai ser adicionado');
   }
 
   function CounterTimeGame(){
@@ -133,18 +154,13 @@ export function Court ({id, name,...rest }: Props ){
     const diffBetweenDate = dateGame.diff(dateNow, 'minute');  
     
     setTimeGame(diffBetweenDate);
-    
-    addStatusGame();    
-    console.log('contou + 1 min')
-
+  
+    changeStatusGame(diffBetweenDate);
     if(diffBetweenDate === 0){
-      console.log('menor');
-    }
-  }
-
-  function addStatusGame(){
-    if(gameCurrent){
-      defineColorBarTextBarAndstatusGame(gameCurrent);
+      setStatusAvailableCourtAfterCounterResets();
+      sendRegisterScreenNextGameInQueue();
+      setStartDateGame('');
+      setEndDateGame('');
     }
   }
 
@@ -177,7 +193,9 @@ export function Court ({id, name,...rest }: Props ){
       <CourtImage source={coutImage}/>
       <ContainerText>
         <Icon source={playersImage}/>        
-        <PlayersCourt></PlayersCourt>
+        <PlayersCourt>
+          {players.length} jogadore(s)
+        </PlayersCourt>
       </ContainerText> 
       <ContainerText>
         <Icon source={timeImage}/>   
