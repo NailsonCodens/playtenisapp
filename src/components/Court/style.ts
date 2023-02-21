@@ -10,15 +10,16 @@ type Props = {
 
 
 export const Container = styled(TouchableOpacity)`
-    margin-bottom: 20px; 
+  margin-bottom: 20px;
+  margin: 4px;
+  width: 14%;
 `;
 
 export const CourtContainer = styled.View`
   background-color: ${({theme}) => theme.COLORS.WHITE};
   align-items: center;
   justify-content: center;
-  width: 156px;
-  height: 140px;
+  height: 185px;
   margin-top: 5px;
   border-top-left-radius: ${({theme}) => theme.BORDER_RADIUS}px;
   border-top-right-radius: ${({theme}) => theme.BORDER_RADIUS}px;

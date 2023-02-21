@@ -48,6 +48,7 @@ export function SelectInput({placeholder, items, fetch}: Props){
   return (
       <RNPickerSelect
         style={pickerStyle}
+        useNativeAndroidPickerStyle={false}        
         placeholder={placeholder}
         onValueChange={(value) => fetch(value)}
         itemKey="value"

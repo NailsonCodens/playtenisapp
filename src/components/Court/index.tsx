@@ -21,6 +21,7 @@ type Props = TouchableOpacityProps & {
   id: string,
   name: string,
   reloadCourts: boolean,
+  reloadFetchCourts: () => void
 }
 
 type courtPropsDTO = {
@@ -51,7 +52,7 @@ type PlayersDTO = {
   status: string;
 };
 
-export function Court ({id, name, reloadCourts, ...rest }: Props ){  
+export function Court ({id, name, reloadCourts, reloadFetchCourts, ...rest }: Props ){  
   const [gameCurrent, setGameCurrent] = useState<gamePropsDTO>();
   const [players, setPlayers] = useState<PlayersDTO[]>([]);
 
@@ -75,7 +76,6 @@ export function Court ({id, name, reloadCourts, ...rest }: Props ){
 
     addColorCourtBarAndStatusCourtBar(game, court);
     mutateDataCourt(game);
-    console.log('altera o status da quadra');
   }
 
   function addColorCourtBarAndStatusCourtBar(game: gamePropsDTO, court: courtPropsDTO){
@@ -111,6 +111,7 @@ export function Court ({id, name, reloadCourts, ...rest }: Props ){
 
   function defineColorBarTextBarAndstatusGame(game: gamePropsDTO){
     const coach = game.players.find(player => player.type === 'coach');
+
     if(game.players.length > 0 && coach){
       setStatusBarColorCourt(colorsCourt.class);
       setStatusGameBar(statusGame.class);
@@ -140,7 +141,6 @@ export function Court ({id, name, reloadCourts, ...rest }: Props ){
   }
 
   function setStatusAvailableCourtAfterCounterResets(){
-    console.log('executou default status');
     setStatusCourtBar(statusCourtText.available);
     setStatusBarColorCourt(colorsCourt.available);  
     setStatusGameBar(statusGame.available);
@@ -151,6 +151,7 @@ export function Court ({id, name, reloadCourts, ...rest }: Props ){
   }
 
   function CounterTimeGame(){
+
     const dateNow = dayjs();
     const dateGame = dayjs(dateFinishGame);
     const diffBetweenDate = dateGame.diff(dateNow, 'minute');  
@@ -158,20 +159,19 @@ export function Court ({id, name, reloadCourts, ...rest }: Props ){
     setTimeGame(diffBetweenDate);
   
     changeStatusGame(diffBetweenDate);
-    //mudar para === 0 caso de bug
-    if(diffBetweenDate < 0){
+    if(diffBetweenDate === 0){
       setStatusAvailableCourtAfterCounterResets();
       sendRegisterScreenNextGameInQueue();
       setStartDateGame('');
       setEndDateGame('');
-      //reloadCourts();    
+      reloadFetchCourts();   
+      setTimeGame(0); 
+      setPlayers([]);
     }
   }
 
   useFocusEffect(useCallback(() => {
-    if(reloadCourts){
-      fetchStatusCourt();
-    }
+    fetchStatusCourt();
   }, []));
 
 
@@ -216,7 +216,7 @@ export function Court ({id, name, reloadCourts, ...rest }: Props ){
           : <Text>00:00</Text>
         }        
       </ContainerText>            
-      <Text>{timeGame > 0 ? `Tempo restante ${timeGame.toString().padStart(2, '0')}:00`: 'Sem jogo'}</Text>
+      <Text>{timeGame > 0 ? `Tempo restante ${timeGame && timeGame.toString().padStart(2, '0')}:00`: 'Sem jogo'}</Text>
     </CourtContainer>
     <StatusBar 
       typeStatusBar={statusCourtBar} 

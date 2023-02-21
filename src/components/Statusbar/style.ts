@@ -8,7 +8,8 @@ export const ContainerStatusBar = styled.View`
   background: ${({theme}) => theme.COLORS.YELLOW};
   justify-content: space-around;
   align-items: center;
-  height: 25px;
+  width: 100%;
+  height: 30px;
   border-bottom-left-radius: ${({theme}) => theme.BORDER_RADIUS}px;
   border-bottom-right-radius: ${({theme}) => theme.BORDER_RADIUS}px; 
 `;

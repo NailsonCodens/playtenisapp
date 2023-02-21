@@ -1,4 +1,4 @@
-import { BodyModal, Container, ContainerModal, ContainerNameCourt, Image, Title, TitleModal } from "./styles";
+import { BodyModal, Container, ContainerModal, ContainerNameCourt, ContainerTime, CourtImage, Image, TextMotivation, Title, TitleModal } from "./styles";
 import { HeaderRegisterGame} from "../../components/HeaderRegisterGame";
 import { ObjectItem, SelectInput } from "../../components/SelectInput";
 import { Form } from '../../components/FormElement/Form';
@@ -16,7 +16,6 @@ import { api } from "../../services/api";
 import { Alert, Modal, Text } from 'react-native';
 import { TitleInputGroup } from '../../components/FormElement/TitleInputGroup/index';
 import tenisBall from '../../assets/tennisball.png';
-import { CourtImage } from "../../components/Court/style";
 import coutImage from '../../assets/court.png';
 
 type RouteParams = {
@@ -42,7 +41,6 @@ export function RegisterGame(){
   const navigator = useNavigation();
   
   const {courtName, courtId} = route.params as RouteParams;
-  console.log('sad')
   const [modalities, setModalities] = useState<ObjectItem[]>([]);
   const [modality, setModality] = useState<modalityType>({
     id: "",
@@ -282,6 +280,7 @@ export function RegisterGame(){
     }    
   }
 
+
   async function handleSaveGameAndPlayers(){
     const playersId: string[] = []; 
 
@@ -305,25 +304,20 @@ export function RegisterGame(){
       return Alert.alert('Cadastro de jogo', 'Adicione alguns jogadores para criar um jogo');
     }
 
-
-
     try {
-      if(idGame == ""){
         const response = await api.post(`/games/`, {
           court_id: idCourt,
-          modality_id: modality.id
+          modality_id: modality.id,
+          players: playersId          
         });      
-        setIdGame(response.data.id);
+        setModalVisible(true);
 
-        await api.post(`/games/players/`, {
-          game_id: response.data.id,
-          players: playersId
-        });
-      }
-      setModalVisible(true);
-    } catch (error) {
-
-      //deletar o jogo cadastrado errado sem players aqui, e no close do pagina, criar uma função para isto.
+        setTimeout(() => {
+          setIdGame('');
+          setModalVisible(false);
+          navigator.navigate('home');
+        }, 20000);
+    } catch (error) {   
       Alert.alert('Cadastro de jogo', error.response?.data.message);
     }
   }
@@ -422,16 +416,6 @@ export function RegisterGame(){
     }
   });
 
-  useEffect(() => {
-    if(modalVisible){
-      setTimeout(() => {
-        setModalVisible(false);
-        setIdGame('');
-        navigator.navigate('home');
-      }, 20000);  
-    }    
-  });
-
   return(
     <Container>
       <Modal
@@ -448,9 +432,8 @@ export function RegisterGame(){
               <Image source={tenisBall}/>              
             </ContainerNameCourt>
             <CourtImage source={coutImage}/>
-            <Text>{minutes.toString().padStart(2, "0")}</Text>
-            <Text>:</Text>
-            <Text>{seconds.toString().padStart(2, "0")}</Text>            
+            <TextMotivation>Seu jogo vai começar em 10 minutos, se prepare e dê o seu melhor!</TextMotivation>
+            <ContainerTime>{minutes.toString().padStart(2, "0")}:{seconds.toString().padStart(2, "0")}</ContainerTime>
           </BodyModal>            
         </ContainerModal>
       </Modal>      
@@ -504,7 +487,7 @@ export function RegisterGame(){
               <Row>
                 <GroupInput>
                   <Button 
-                    title="Play"
+                    title={'Play'}
                     onPress={() => handleSaveGameAndPlayers()}
                   />
                 </GroupInput>

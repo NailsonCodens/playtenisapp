@@ -27,7 +27,7 @@ export const ContainerModal = styled.View`
 
 export const BodyModal = styled.View`
   width: 70%;
-  height: 300px;
+  padding: 10%;
   align-items: center;
   justify-content: center;
   ${({theme}) => css`
@@ -39,7 +39,7 @@ export const BodyModal = styled.View`
 export const TitleModal = styled.Text`
   ${({theme}) => css`
     color: ${theme.COLORS.GREEN};
-    font-size: ${theme.FONT_SIZE.LG}px;
+    font-size: 30px;
     font-family: ${theme.FONT_FAMILY.SEMIBOLD};
   `};  
 `;
@@ -60,7 +60,34 @@ export const Title = styled.Text`
 `;
 
 export const Image = styled.Image`
-  width: 20px;
-  height: 20px;
+  width: 35px;
+  height: 35px;
   margin-left: 10px;
+  margin-top: -10px;
+`;
+
+export const ContainerTime = styled.Text`
+  ${({theme}) => css`
+    color: ${theme.COLORS.BLACK_900};
+    font-size: 50px;
+    font-family: ${theme.FONT_FAMILY.BOLD};
+    margin-top: 20px;
+  `}
+`;
+
+export const TextMotivation = styled.Text`
+  width: 80%;
+  text-align: center;
+  ${({theme}) => css`
+    color: ${theme.COLORS.BLACK_900};
+    font-size: ${theme.FONT_SIZE.LG}px;
+    font-family: ${theme.FONT_FAMILY.BOLD};
+    margin-top: 20px;
+  `}  
+`;
+
+export const CourtImage = styled.Image`
+  width: 150px;
+  height: 100px;
+  margin-bottom: 2px;
 `;

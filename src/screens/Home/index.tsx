@@ -1,13 +1,14 @@
 
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import {Header} from '../../components/Header'
-import { ButtonJoinQueue, Container, ContainerQueues, ContainerScroll, Courts, QueueBox, QueueCol, TextButtonJoinQueue, TextQueue} from './styles';
+import { ButtonJoinQueue, Container, ContainerQueues, ContainerScroll, Courts, Icon, QueueBox, QueueCol, QueueRow, TextButtonJoinQueue, TextQueue} from './styles';
 import { Court } from '../../components/Court';
 import { api } from '../../services/api';
 import { useCallback, useEffect, useState } from 'react';
 import { courtsType } from '../../dtos/courtsDTO';
 import { Alert } from 'react-native';
 import { queueType } from '../../dtos/queueDTO';
+import playersImage from '../../assets/players.png';
 
 
 type playerMap = {
@@ -63,10 +64,32 @@ export function Home (){
     fetchQueue();
   }, []));
 
+  function renderColumnsQueue(players){
+    let arrayPlayers: string[] = [];
+
+    players.map(player => {
+      arrayPlayers.push(player.name)
+    });
+
+    const playersTogether = arrayPlayers.join(' x ')
+
+    if(playersTogether){
+      return (
+        <QueueRow key={playersTogether}>
+          <Icon source={playersImage}/>        
+          <QueueCol>{playersTogether}</QueueCol>
+        </QueueRow>  
+      )  
+    }
+  }
+
   return(
     <Container>
       <Header/>
-      <ContainerScroll>
+      <ContainerScroll 
+        horizontal={true}
+        showsHorizontalScrollIndicator={false}
+      >
         <Courts>
           {
             courts.map(court => (
@@ -81,26 +104,20 @@ export function Home (){
             ))
           }                                      
         </Courts>
-        <ContainerQueues>
-          <QueueBox>
-            <TextQueue>Fila de espera</TextQueue>
-            {
-              queue.map(queue => {
-                return queue.players.map((player: playerMap) => (
-                  <QueueCol key={player.id}>                  
-                    {player.name}
-                  </QueueCol>  
-                ))
-              })
-            }
-          </QueueBox>
-          <ButtonJoinQueue
-            onPress={handleRegisterQueue}
-          >
-            <TextButtonJoinQueue>Entrar na fila de espera</TextButtonJoinQueue>
-          </ButtonJoinQueue>
-        </ContainerQueues>
       </ContainerScroll>
+      <ContainerQueues>
+        <QueueBox>
+          <TextQueue>Fila de espera</TextQueue>
+          {
+            queue.map(queue => { return renderColumnsQueue(queue.players)})
+          }
+        </QueueBox>
+        <ButtonJoinQueue
+          onPress={handleRegisterQueue}
+        >
+          <TextButtonJoinQueue>Entrar na fila de espera</TextButtonJoinQueue>
+        </ButtonJoinQueue>
+      </ContainerQueues>
      </Container>
   )
 }
