@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import { TouchableOpacityProps, Text, Alert } from 'react-native';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { Container, CourtContainer, NameCourt, CourtImage, ContainerText, PlayersCourt, Icon } from './style';
 import { StatusBar } from "../Statusbar";
@@ -15,11 +15,12 @@ import playersImage from '../../assets/players.png';
 import { colorsCourt } from '../../utils/colorsCourt';
 import { statusCourtText } from '../../utils/statusCourtText';
 import { statusGame } from '../../utils/statusGame';
+import { useFocusEffect } from '@react-navigation/native';
 
 type Props = TouchableOpacityProps & {
   id: string,
   name: string,
-  reloadCourts: () => void,
+  reloadCourts: boolean,
 }
 
 type courtPropsDTO = {
@@ -74,6 +75,7 @@ export function Court ({id, name, reloadCourts, ...rest }: Props ){
 
     addColorCourtBarAndStatusCourtBar(game, court);
     mutateDataCourt(game);
+    console.log('altera o status da quadra');
   }
 
   function addColorCourtBarAndStatusCourtBar(game: gamePropsDTO, court: courtPropsDTO){
@@ -162,13 +164,16 @@ export function Court ({id, name, reloadCourts, ...rest }: Props ){
       sendRegisterScreenNextGameInQueue();
       setStartDateGame('');
       setEndDateGame('');
-      reloadCourts();    
+      //reloadCourts();    
     }
   }
 
-  useEffect(() => {
-    fetchStatusCourt();
-  }, [])
+  useFocusEffect(useCallback(() => {
+    if(reloadCourts){
+      fetchStatusCourt();
+    }
+  }, []));
+
 
   useEffect(() => {
     if(timeGame === 0){

@@ -16,3 +16,51 @@ export const Label = styled.Text`
 export const ColumnGroup = styled.View`
   background-color: red;
 `;
+
+export const ContainerModal = styled.View`
+  background: rgba(0, 0, 0, 0.7);
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+`;
+
+export const BodyModal = styled.View`
+  width: 70%;
+  height: 300px;
+  align-items: center;
+  justify-content: center;
+  ${({theme}) => css`
+    background: ${theme.COLORS.WHITE};
+    border-radius: ${theme.BORDER_RADIUS}px;  
+  `};
+`;
+
+export const TitleModal = styled.Text`
+  ${({theme}) => css`
+    color: ${theme.COLORS.GREEN};
+    font-size: ${theme.FONT_SIZE.LG}px;
+    font-family: ${theme.FONT_FAMILY.SEMIBOLD};
+  `};  
+`;
+
+export const ContainerNameCourt = styled.View`
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+`;
+
+export const Title = styled.Text`
+  ${({theme}) => css`
+    color: ${theme.COLORS.BLACK_900};
+    font-size: ${theme.FONT_SIZE.XL}px;
+    font-family: ${theme.FONT_FAMILY.BOLD};
+  `}
+`;
+
+export const Image = styled.Image`
+  width: 20px;
+  height: 20px;
+  margin-left: 10px;
+`;

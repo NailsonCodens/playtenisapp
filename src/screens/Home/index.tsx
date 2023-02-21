@@ -1,10 +1,10 @@
 
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import {Header} from '../../components/Header'
 import { ButtonJoinQueue, Container, ContainerQueues, ContainerScroll, Courts, QueueBox, QueueCol, TextButtonJoinQueue, TextQueue} from './styles';
 import { Court } from '../../components/Court';
 import { api } from '../../services/api';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { courtsType } from '../../dtos/courtsDTO';
 import { Alert } from 'react-native';
 import { queueType } from '../../dtos/queueDTO';
@@ -20,6 +20,7 @@ export function Home (){
   const navigator = useNavigation();
   const [courts, setCourts] = useState<courtsType[]>([]);
   const [queue, setQueue] = useState<queueType[]>([]);
+  const [reload, setReload] = useState(false);
   async function fetchCourts(){
     const response = await api.get('courts');
     setCourts(response.data.list)
@@ -53,14 +54,14 @@ export function Home (){
     navigator.navigate('queue');
   }
 
-  useEffect(() => {
-    fetchCourts()
-  }, []);
+  useFocusEffect(useCallback(() => {
+    fetchCourts();
+    setReload(true);
+  }, []));
 
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     fetchQueue();
-  }, []);  
-
+  }, []));
 
   return(
     <Container>
@@ -74,8 +75,9 @@ export function Home (){
                 id={court.id}
                 name={court.name}
                 onPress={() => handleRegister(court.id)}
-                reloadCourts={() => fetchCourts()}
-                />
+                reloadCourts={reload}
+                reloadFetchCourts={() => fetchCourts()}
+              />
             ))
           }                                      
         </Courts>

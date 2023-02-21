@@ -1,4 +1,4 @@
-import { Container } from "./styles";
+import { BodyModal, Container, ContainerModal, ContainerNameCourt, Image, Title, TitleModal } from "./styles";
 import { HeaderRegisterGame} from "../../components/HeaderRegisterGame";
 import { ObjectItem, SelectInput } from "../../components/SelectInput";
 import { Form } from '../../components/FormElement/Form';
@@ -8,13 +8,16 @@ import { Label } from "../../components/FormElement/Label";
 import { AvailableCourt } from '../../components/AvailableCourt';
 import { Input } from "../../components/InputText";
 import { Button } from "../../components/Button";
-import { useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import {NoneModalitySelected} from "../../components/NoneModalitySelected";
 
 import { api } from "../../services/api";
-import { Alert, Text } from 'react-native';
+import { Alert, Modal, Text } from 'react-native';
 import { TitleInputGroup } from '../../components/FormElement/TitleInputGroup/index';
+import tenisBall from '../../assets/tennisball.png';
+import { CourtImage } from "../../components/Court/style";
+import coutImage from '../../assets/court.png';
 
 type RouteParams = {
   courtName: string,
@@ -36,8 +39,10 @@ type modalityType = {
 
 export function RegisterGame(){
   const route = useRoute();
+  const navigator = useNavigation();
+  
   const {courtName, courtId} = route.params as RouteParams;
-console.log(courtName, courtId);
+  console.log('sad')
   const [modalities, setModalities] = useState<ObjectItem[]>([]);
   const [modality, setModality] = useState<modalityType>({
     id: "",
@@ -70,6 +75,13 @@ console.log(courtName, courtId);
   const [idFourthOriginalPlayer, setIdFourthOriginalPlayer] = useState<string>("");  
   const [dataFourthPlayer, setDataFourthPlayer] = useState<string[]>([]);
   
+  const [modalVisible, setModalVisible] = useState(false);
+  const [counter, setCounter] = useState(10 * 60);
+
+  const minutes = Math.floor(counter / 60);
+  const seconds = counter % 60;
+
+  const [errosApi, setErrosApi] = useState(true);
 
   async function fetchModalities(){
     const response = await api.get(`/modalities/`);
@@ -270,7 +282,6 @@ console.log(courtName, courtId);
     }    
   }
 
-
   async function handleSaveGameAndPlayers(){
     const playersId: string[] = []; 
 
@@ -294,9 +305,7 @@ console.log(courtName, courtId);
       return Alert.alert('Cadastro de jogo', 'Adicione alguns jogadores para criar um jogo');
     }
 
-    console.log(idCourt);
-    console.log(modality.id);
-    console.log(playersId);
+
 
     try {
       if(idGame == ""){
@@ -305,17 +314,16 @@ console.log(courtName, courtId);
           modality_id: modality.id
         });      
         setIdGame(response.data.id);
+
+        await api.post(`/games/players/`, {
+          game_id: response.data.id,
+          players: playersId
+        });
       }
-
-      await api.post(`/games/players/`, {
-        game_id: idGame,
-        players: playersId
-      });
-
-      //colocar aqui o setGame como vazio pois o processo de cadastro acabou;
-      //abrir modal e avisar que o jogo vai comerçar em 9 minutis
-      //fazer voltar a home dpsde alguns segundos e atualizar a rota das quadras usando usestatenavigator e
+      setModalVisible(true);
     } catch (error) {
+
+      //deletar o jogo cadastrado errado sem players aqui, e no close do pagina, criar uma função para isto.
       Alert.alert('Cadastro de jogo', error.response?.data.message);
     }
   }
@@ -406,8 +414,46 @@ console.log(courtName, courtId);
     fetchModalities();
   }, []);
 
+  useEffect(() => {
+    if(modalVisible){
+      setTimeout(() => {
+        setCounter(counter - 1);
+      }, 1000);  
+    }
+  });
+
+  useEffect(() => {
+    if(modalVisible){
+      setTimeout(() => {
+        setModalVisible(false);
+        setIdGame('');
+        navigator.navigate('home');
+      }, 20000);  
+    }    
+  });
+
   return(
     <Container>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible} 
+        supportedOrientations={['landscape']} 
+      >
+        <ContainerModal>
+          <BodyModal>
+            <TitleModal>Jogo cadastrado com sucesso!</TitleModal>
+            <ContainerNameCourt>
+              <Title>{nameCourt}</Title>
+              <Image source={tenisBall}/>              
+            </ContainerNameCourt>
+            <CourtImage source={coutImage}/>
+            <Text>{minutes.toString().padStart(2, "0")}</Text>
+            <Text>:</Text>
+            <Text>{seconds.toString().padStart(2, "0")}</Text>            
+          </BodyModal>            
+        </ContainerModal>
+      </Modal>      
       <Form>
       <HeaderRegisterGame 
         title="Cadastro de jogo"
