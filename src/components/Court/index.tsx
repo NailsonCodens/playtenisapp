@@ -19,7 +19,7 @@ import { statusGame } from '../../utils/statusGame';
 type Props = TouchableOpacityProps & {
   id: string,
   name: string,
-  players: string
+  reloadCourts: () => void,
 }
 
 type courtPropsDTO = {
@@ -50,7 +50,7 @@ type PlayersDTO = {
   status: string;
 };
 
-export function Court ({id, name,...rest }: Props ){  
+export function Court ({id, name, reloadCourts, ...rest }: Props ){  
   const [gameCurrent, setGameCurrent] = useState<gamePropsDTO>();
   const [players, setPlayers] = useState<PlayersDTO[]>([]);
 
@@ -156,11 +156,13 @@ export function Court ({id, name,...rest }: Props ){
     setTimeGame(diffBetweenDate);
   
     changeStatusGame(diffBetweenDate);
-    if(diffBetweenDate === 0){
+    //mudar para === 0 caso de bug
+    if(diffBetweenDate < 0){
       setStatusAvailableCourtAfterCounterResets();
       sendRegisterScreenNextGameInQueue();
       setStartDateGame('');
       setEndDateGame('');
+      reloadCourts();    
     }
   }
 

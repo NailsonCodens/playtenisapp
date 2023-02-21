@@ -9,6 +9,7 @@ export const Label = styled.Text`
   ${({theme}) => css`
     font-size: ${theme.FONT_SIZE.MD}px;
     color: ${theme.COLORS.BLACK_900};
+    font-family: ${theme.FONT_FAMILY.SEMIBOLD};
   `}
 `;
 

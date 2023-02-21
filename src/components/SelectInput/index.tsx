@@ -33,25 +33,25 @@ const pickerStyle = {
 	},
 };
 
-type Props = {
-  placeholder: object,
-  items: string[],
+export type ObjectItem = {
+  label: string,
+  value: string,
 };
 
-export function SelectInput({placeholder, items}: Props){
+type Props = {
+  placeholder: object,
+  items: ObjectItem[],
+  fetch: (value: object) => void,
+};
+
+export function SelectInput({placeholder, items, fetch}: Props){
   return (
-    <Container>
       <RNPickerSelect
         style={pickerStyle}
         placeholder={placeholder}
-        onValueChange={(value) => console.log(value)}
+        onValueChange={(value) => fetch(value)}
         itemKey="value"
-        items={[
-          { label: 'Football', value: 'football' },
-          { label: 'Baseball', value: 'baseball' },
-          { label: 'Hockey', value: 'hockey' },
-        ]}
+        items={items}
       />
-    </Container>
   );
 }

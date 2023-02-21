@@ -36,7 +36,6 @@ export const QueueBox = styled.ScrollView`
 
 export const QueueCol = styled.Text`
   width: 100%;
-  background: red;
 `;
 
 

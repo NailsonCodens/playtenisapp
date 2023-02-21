@@ -4,6 +4,7 @@ export declare global {
       home: undefined;
       register: {
         courtId: string;
+        courtName: string;
       }
       queue: undefined;
     }

@@ -1,7 +1,7 @@
 
 import { useNavigation } from '@react-navigation/native';
 import {Header} from '../../components/Header'
-import { ButtonJoinQueue, Container, ContainerQueues, ContainerScroll, Courts, QueueBox, QueueCol, QueueLine, TextButtonJoinQueue, TextQueue} from './styles';
+import { ButtonJoinQueue, Container, ContainerQueues, ContainerScroll, Courts, QueueBox, QueueCol, TextButtonJoinQueue, TextQueue} from './styles';
 import { Court } from '../../components/Court';
 import { api } from '../../services/api';
 import { useEffect, useState } from 'react';
@@ -30,11 +30,11 @@ export function Home (){
     setQueue(response.data)
   }
 
-
   async function handleRegister(courtId: string){
     const response = await api.get(`/games/game-court-current/${courtId}`);
 
     const {game} = response.data;
+    const {court} = response.data;
 
     if(game){
       return Alert.alert('Quadras', 'Quadra ocupada. seleciona uma disponível ou entre na fila de espera');
@@ -46,7 +46,7 @@ export function Home (){
       return Alert.alert('Quadras', 'Esta quadra não está disponível');
     }
 
-    navigator.navigate('register', {courtId: courtId});
+    navigator.navigate('register', {courtId: courtId, courtName: court.name});
   }
 
   function handleRegisterQueue(){
@@ -73,8 +73,8 @@ export function Home (){
                 key={court.id}
                 id={court.id}
                 name={court.name}
-                players={'dsadsad'}
                 onPress={() => handleRegister(court.id)}
+                reloadCourts={() => fetchCourts()}
                 />
             ))
           }                                      
