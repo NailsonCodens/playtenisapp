@@ -41,15 +41,17 @@ export type ObjectItem = {
 type Props = {
   placeholder: object,
   items: ObjectItem[],
+  value: string,
   fetch: (value: object) => void,
 };
 
-export function SelectInput({placeholder, items, fetch}: Props){
+export function SelectInput({placeholder, items, fetch, value}: Props){
   return (
       <RNPickerSelect
         style={pickerStyle}
         useNativeAndroidPickerStyle={false}        
         placeholder={placeholder}
+        value={value}
         onValueChange={(value) => fetch(value)}
         itemKey="value"
         items={items}

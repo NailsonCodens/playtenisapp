@@ -6,9 +6,10 @@ import { Court } from '../../components/Court';
 import { api } from '../../services/api';
 import { useCallback, useEffect, useState } from 'react';
 import { courtsType } from '../../dtos/courtsDTO';
-import { Alert } from 'react-native';
+import { Alert, RefreshControl, Text, TouchableOpacity } from 'react-native';
 import { queueType } from '../../dtos/queueDTO';
 import playersImage from '../../assets/players.png';
+import { Button } from '../../components/Button';
 
 
 type playerMap = {
@@ -22,7 +23,11 @@ export function Home (){
   const [courts, setCourts] = useState<courtsType[]>([]);
   const [queue, setQueue] = useState<queueType[]>([]);
   const [reload, setReload] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [showButton, setShowButton] = useState<boolean>(true);
+
   async function fetchCourts(){
+    console.log('executou');
     const response = await api.get('courts');
     setCourts(response.data.list)
   }
@@ -55,16 +60,21 @@ export function Home (){
     navigator.navigate('queue');
   }
 
-  useFocusEffect(useCallback(() => {
-    fetchCourts();
-    setReload(true);
-  }, []));
+  function handleSendRegisterGameBeforeQueue(id: string){
+    console.log('vou mandar para a página que registra o jogo com todos os dados cadastrados já');
+    navigator.navigate('gamequeue', { queueId: id });
+  }
 
-  useFocusEffect(useCallback(() => {
-    fetchQueue();
-  }, []));
+  function checkQueueExists(){
+    console.log('aaaaaa');
 
-  function renderColumnsQueue(players){
+    if(queue.length > 0){
+      setShowButton(true);
+      console.log('libera botão apenas pro primeiro grupo  da fila de espera.');
+    }
+  }
+
+  function renderColumnsQueue(players, id){
     let arrayPlayers: string[] = [];
 
     players.map(player => {
@@ -76,12 +86,57 @@ export function Home (){
     if(playersTogether){
       return (
         <QueueRow key={playersTogether}>
-          <Icon source={playersImage}/>        
+          <QueueCol><Icon source={playersImage}/></QueueCol>        
           <QueueCol>{playersTogether}</QueueCol>
+          <QueueCol>
+            {
+              showButton ? 
+              <TouchableOpacity
+                onPress={() => handleSendRegisterGameBeforeQueue(id)}
+              >
+                <Text>Quadra liberada!</Text>
+              </TouchableOpacity>
+              : 
+              <></>
+            }
+          </QueueCol>
         </QueueRow>  
       )  
     }
   }
+
+  function renderCourt(court){
+    return (
+      <Court
+        key={court.id}
+        id={court.id}
+        name={court.name}
+        data={court}
+        onPress={() => handleRegister(court.id)}
+        reloadCourts={reload}
+        reloadFetchCourts={() => fetchCourts()}
+        checkQueue={() => checkQueueExists()}
+    />      
+    );    
+  }
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => {
+      fetchCourts();
+      setReload(true);
+      setRefreshing(false);
+    }, 2000);
+    setReload(false);
+  }, []);
+
+  useFocusEffect(useCallback(() => {
+    fetchCourts();
+  }, []));
+
+  useFocusEffect(useCallback(() => {
+    fetchQueue();
+  }, []));
 
   return(
     <Container>
@@ -89,19 +144,15 @@ export function Home (){
       <ContainerScroll 
         horizontal={true}
         showsHorizontalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }        
       >
         <Courts>
           {
-            courts.map(court => (
-              <Court
-                key={court.id}
-                id={court.id}
-                name={court.name}
-                onPress={() => handleRegister(court.id)}
-                reloadCourts={reload}
-                reloadFetchCourts={() => fetchCourts()}
-              />
-            ))
+            courts.map(court => 
+              {return renderCourt(court)}
+            )
           }                                      
         </Courts>
       </ContainerScroll>
@@ -109,7 +160,7 @@ export function Home (){
         <QueueBox>
           <TextQueue>Fila de espera</TextQueue>
           {
-            queue.map(queue => { return renderColumnsQueue(queue.players)})
+            queue.map(queue => { return renderColumnsQueue(queue.players, queue.id)})
           }
         </QueueBox>
         <ButtonJoinQueue

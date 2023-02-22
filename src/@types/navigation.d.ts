@@ -7,6 +7,9 @@ export declare global {
         courtName: string;
       }
       queue: undefined;
+      gamequeue: {
+        queueId: string;
+      };
     }
   }
 }

@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import { TouchableOpacityProps, Text, Alert } from 'react-native';
-import { useCallback, useEffect, useState } from 'react';
+import { RefObject, useCallback, useEffect, useState } from 'react';
 
 import { Container, CourtContainer, NameCourt, CourtImage, ContainerText, PlayersCourt, Icon } from './style';
 import { StatusBar } from "../Statusbar";
@@ -21,7 +21,13 @@ type Props = TouchableOpacityProps & {
   id: string,
   name: string,
   reloadCourts: boolean,
-  reloadFetchCourts: () => void
+  data: string[],
+  reloadFetchCourts: () => void,
+  checkQueue: () => void,
+}
+
+type RefCourt = {
+
 }
 
 type courtPropsDTO = {
@@ -39,7 +45,7 @@ type gamePropsDTO = {
       id: string,
       type: string,
       name: string,
-      registration: string
+      registration: string,
     }    
   ]
 };
@@ -52,7 +58,7 @@ type PlayersDTO = {
   status: string;
 };
 
-export function Court ({id, name, reloadCourts, reloadFetchCourts, ...rest }: Props ){  
+export function Court ({id, name, reloadCourts, reloadFetchCourts, checkQueue, data, ...rest }: Props ){ 
   const [gameCurrent, setGameCurrent] = useState<gamePropsDTO>();
   const [players, setPlayers] = useState<PlayersDTO[]>([]);
 
@@ -64,8 +70,9 @@ export function Court ({id, name, reloadCourts, reloadFetchCourts, ...rest }: Pr
   const [timeGame, setTimeGame] = useState<number>(0);
   const [startDateGame, setStartDateGame] = useState('');
   const [endDateGame, setEndDateGame] = useState('');
-
+  
   async function fetchStatusCourt(){
+    console.log('to sendo executado');
     const response = await api.get(`/games/game-court-current/${id}`);
 
     const {game, court} = response.data;
@@ -146,10 +153,6 @@ export function Court ({id, name, reloadCourts, reloadFetchCourts, ...rest }: Pr
     setStatusGameBar(statusGame.available);
   }
 
-  function sendRegisterScreenNextGameInQueue(){
-    Alert.alert('Enviar', 'Enviar para a tela de formulário onde o próximo da queue vai ser adicionado');
-  }
-
   function CounterTimeGame(){
 
     const dateNow = dayjs();
@@ -161,19 +164,23 @@ export function Court ({id, name, reloadCourts, reloadFetchCourts, ...rest }: Pr
     changeStatusGame(diffBetweenDate);
     if(diffBetweenDate === 0){
       setStatusAvailableCourtAfterCounterResets();
-      sendRegisterScreenNextGameInQueue();
       setStartDateGame('');
       setEndDateGame('');
       reloadFetchCourts();   
       setTimeGame(0); 
       setPlayers([]);
+      checkQueue();
     }
   }
 
   useFocusEffect(useCallback(() => {
-    fetchStatusCourt();
-  }, []));
-
+    if(reloadCourts){
+      fetchStatusCourt(); 
+    }else{
+      fetchStatusCourt(); 
+    }
+ 
+  }, [reloadCourts]));
 
   useEffect(() => {
     if(timeGame === 0){

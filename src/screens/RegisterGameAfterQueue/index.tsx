@@ -1,46 +1,35 @@
-import { BodyModal, Container, ContainerModal, ContainerNameCourt, ContainerTime, CourtImage, Image, TextMotivation, Title, TitleModal } from "./styles";
-import { HeaderRegisterGame} from "../../components/HeaderRegisterGame";
-import { ObjectItem, SelectInput } from "../../components/SelectInput";
-import { Form } from '../../components/FormElement/Form';
-import { Row } from "../../components/FormElement/Row";
-import { GroupInput } from "../../components/FormElement/GroupInput";
-import { Label } from "../../components/FormElement/Label";
+import { useRoute, useFocusEffect } from '@react-navigation/native';
+import { useState, useEffect, useCallback } from 'react';
 import { AvailableCourt } from '../../components/AvailableCourt';
-import { Input } from "../../components/InputText";
-import { Button } from "../../components/Button";
-import { useNavigation, useRoute } from "@react-navigation/native";
-import { useEffect, useState } from "react";
-import {NoneModalitySelected} from "../../components/NoneModalitySelected";
-
+import { Button } from '../../components/Button';
+import { Form } from "../../components/FormElement/Form";
+import { GroupInput } from '../../components/FormElement/GroupInput';
+import { Label } from '../../components/FormElement/Label';
+import { Row } from '../../components/FormElement/Row';
+import { TitleInputGroup } from '../../components/FormElement/TitleInputGroup';
+import { HeaderRegisterGame } from "../../components/HeaderRegisterGame";
+import { Input } from '../../components/InputText';
+import { NoneModalitySelected } from '../../components/NoneModalitySelected';
+import { ObjectItem, SelectInput } from "../../components/SelectInput";
 import { api } from "../../services/api";
-import { Alert, Modal, Text } from 'react-native';
-import { TitleInputGroup } from '../../components/FormElement/TitleInputGroup/index';
-import tenisBall from '../../assets/tennisball.png';
-import coutImage from '../../assets/court.png';
+import { modalitiesType, modalityType } from "../RegisterGame";
 
 type RouteParams = {
-  courtName: string,
-  courtId: string,
+  queueId: string,
 }
 
-export type modalitiesType = {
-  name: string,
+type ObjectQueue = {
   id: string,
+  modality_id: string,
+  played: string,
+  players: string[]
 }
 
-export type modalityType = {
-	id: string,
-	name: string,
-	amount_players: string,
-	time: number,
-	status: string;  
-}
-
-export function RegisterGame(){
+export function RegisterGameWithQueue(){
   const route = useRoute();
-  const navigator = useNavigation();
-  
-  const {courtName, courtId} = route.params as RouteParams;
+  const { queueId } = route.params as RouteParams;
+
+  const [queue, setQueue] = useState<ObjectQueue>({});
   const [modalities, setModalities] = useState<ObjectItem[]>([]);
   const [modality, setModality] = useState<modalityType>({
     id: "",
@@ -49,9 +38,6 @@ export function RegisterGame(){
     time: 0,
     status: "",
   });
-  const [nameCourt, setNameCourt] = useState<string>(courtName);
-  const [idCourt, setIdCourt] = useState<string>(courtId);
-  const [idGame, setIdGame] = useState<string>("");
 
   const [registrationFirstPlayer, setRegistrationFirstPlayer] = useState<string>("");
   const [idFirstPlayer, setIdFirstPlayer] = useState<string>("");
@@ -79,6 +65,11 @@ export function RegisterGame(){
   const minutes = Math.floor(counter / 60);
   const seconds = counter % 60;
 
+  async function fetchQueue(){
+    const response = await api.get(`queue/${queueId}`);
+    setQueue(response.data)
+  }
+
   async function fetchModalities(){
     const response = await api.get(`/modalities/`);
 
@@ -91,15 +82,17 @@ export function RegisterGame(){
 
     setModalities(newModalities);
   }
-
+  
   async function fetchAmountPlayers(id: object){
     const modalitId = String(id);
+
+    console.log(id);
 
     if(modalitId !== ""){
       const response = await api.get(`/modalities/${id}`);
       setModality(response.data);
     }
-  }
+  }  
 
   async function handleRegistrationPlayer(player: string){
 
@@ -264,6 +257,7 @@ export function RegisterGame(){
         <>
           <Label label="Escolha se você ou algum deles é quem vai jogar?" textColor={true}/>
           <SelectInput 
+            value=''
             placeholder={{ label: 'Eu mesmo vou jogar', value: ''}}
             fetch={(value) => {selectDependentPlayer(value, howsplayer)}}
             items={newDependentsPlayer}
@@ -273,46 +267,8 @@ export function RegisterGame(){
     }    
   }
 
-
-  async function handleSaveGameAndPlayers(){
-    const playersId: string[] = []; 
-
-    if(idFirstPlayer !== undefined && idFirstPlayer !== ""){
-      playersId.push(idFirstPlayer);
-    }
-
-    if(idSecondPlayer !== undefined && idSecondPlayer !== ""){
-      playersId.push(idSecondPlayer);
-    }
-
-    if(idThirdPlayer !== undefined && idThirdPlayer !== ""){
-      playersId.push(idThirdPlayer);
-    }
-
-    if(idFourthPlayer !== undefined && idFourthPlayer !== ""){
-      playersId.push(idFourthPlayer);
-    }
-
-    if(playersId.length === 0){
-      return Alert.alert('Cadastro de jogo', 'Adicione alguns jogadores para criar um jogo');
-    }
-
-    try {
-        const response = await api.post(`/games/`, {
-          court_id: idCourt,
-          modality_id: modality.id,
-          players: playersId          
-        });      
-        setModalVisible(true);
-
-        setTimeout(() => {
-          setIdGame('');
-          setModalVisible(false);
-          navigator.navigate('home');
-        }, 20000);
-    } catch (error) {   
-      Alert.alert('Cadastro de jogo', error.response?.data.message);
-    }
+  function handleSaveGameAfterQueue(){
+    console.log('-');
   }
 
   function renderInicialInputs(){
@@ -410,101 +366,77 @@ export function RegisterGame(){
         </Row>
       </>
     );
-  }
+  }  
 
   useEffect(() => {
-    fetchModalities();
+    fetchQueue();    
   }, []);
 
   useEffect(() => {
-    if(modalVisible){
-      setTimeout(() => {
-        setCounter(counter - 1);
-      }, 1000);  
-    }
-  });
+    fetchModalities();    
+  }, []);
 
-  return(
-    <Container>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible} 
-        supportedOrientations={['landscape']} 
-      >
-        <ContainerModal>
-          <BodyModal>
-            <TitleModal>Jogo cadastrado com sucesso!</TitleModal>
-            <ContainerNameCourt>
-              <Title>{nameCourt}</Title>
-              <Image source={tenisBall}/>              
-            </ContainerNameCourt>
-            <CourtImage source={coutImage}/>
-            <TextMotivation>Seu jogo vai começar em 10 minutos, se prepare e dê o seu melhor!</TextMotivation>
-            <ContainerTime>{minutes.toString().padStart(2, "0")}:{seconds.toString().padStart(2, "0")}</ContainerTime>
-          </BodyModal>            
-        </ContainerModal>
-      </Modal>      
-      <Form>
+  return (
+   <>
+    <Form>
       <HeaderRegisterGame 
         title="Cadastro de jogo"
-      />        
-        <Row>
-          <GroupInput>
-            <Label label="Quadra Selecionada" textColor={false} />
-            <AvailableCourt court={nameCourt}/>
-          </GroupInput>
-          <GroupInput>
-            <Label label="Modalidade" textColor={false}/>
-            <SelectInput 
-              value=""
-              placeholder={{ label: 'Selecione a modalidade', value: '' }} 
-              fetch={(id) => {fetchAmountPlayers(id)}}
-              items={modalities}
-            />
-          </GroupInput>
-        </Row>
-        {
-          modality.amount_players === '0' ?
-          (
-            <>
-              <NoneModalitySelected message="Selecione uma quadra para inicia o cadastro"/>
-            </>
-          ):
-          (
-            <>
-              {
-                modality.amount_players === '2' ?
-                (
-                  <>
-                    {
-                      renderInicialInputs()                    
-                    }
-                  </>
-                ):
-                (
-                  <>
-                    {
-                      renderInicialInputs()                    
-                    }
-                    {
-                      renderFinalInputsWhenCourtisForPlayers()                    
-                    }
-                  </>
-                )
-              }  
-              <Row>
-                <GroupInput>
-                  <Button 
-                    title={'Play'}
-                    onPress={() => handleSaveGameAndPlayers()}
-                  />
-                </GroupInput>
-              </Row>    
-            </>            
-          )
-        }                    
-      </Form>
-    </Container>
-  )
-}
+      />  
+      <Row>
+        <GroupInput>
+          <Label label="Selecione a quadra" textColor={false} />
+        </GroupInput>
+        <GroupInput>
+          <Label label="Modalidade" textColor={false}/>
+          <SelectInput
+            value={queue.modality_id}
+            placeholder={{ label: 'Selecione a modalidade', value: '' }} 
+            fetch={(id) => {fetchAmountPlayers(id)}}
+            items={modalities}
+          />
+        </GroupInput>
+      </Row>      
+      {
+        modality.amount_players === '0' ?
+        (
+          <>
+            <NoneModalitySelected message="Selecione uma quadra para inicia o cadastro"/>
+          </>
+        ):
+        (
+          <>
+            {
+              modality.amount_players === '2' ?
+              (
+                <>
+                  {
+                    renderInicialInputs()                    
+                  }
+                </>
+              ):
+              (
+                <>
+                  {
+                    renderInicialInputs()                    
+                  }
+                  {
+                    renderFinalInputsWhenCourtisForPlayers()                    
+                  }
+                </>
+              )
+            }  
+            <Row>
+              <GroupInput>
+                <Button 
+                  title={'Play'}
+                  onPress={() => handleSaveGameAfterQueue()}
+                />
+              </GroupInput>
+            </Row>    
+          </>            
+        )
+      }        
+    </Form>
+   </>
+  ) 
+ }

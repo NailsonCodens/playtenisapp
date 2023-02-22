@@ -1,14 +1,16 @@
-import { Text } from "./styles";
-
+import { LabelText } from "./styles";
 
 type Props = {
   label: string,
+  textColor: boolean
 }
 
-export function Label({label}: Props) {
+export function Label({label, textColor}: Props) {
   return(
-    <Text>
+    <LabelText
+    type={textColor}
+    >
       {label}
-    </Text>
+    </LabelText>
   )
 }

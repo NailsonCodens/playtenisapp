@@ -35,12 +35,11 @@ export const QueueBox = styled.ScrollView`
 `;
 
 export const QueueRow = styled.View`
-  width: 100%;
   flex-direction: row;
+  width: 100%;
 `;
 
 export const QueueCol = styled.Text`
-  width: 100%;
   margin-bottom: 5px;
   font-size: ${({theme}) => theme.FONT_SIZE.MD}px;
   color: ${({theme}) => theme.COLORS.BLACK_900};
