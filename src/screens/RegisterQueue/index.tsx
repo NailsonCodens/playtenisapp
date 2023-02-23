@@ -1,4 +1,5 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { AxiosError } from 'axios';
 import { useEffect, useState } from 'react';
 import { Alert, Modal } from 'react-native';
 import { AvailableCourt } from '../../components/AvailableCourt';
@@ -13,7 +14,9 @@ import { Input } from '../../components/InputText';
 import { NoneModalitySelected } from '../../components/NoneModalitySelected';
 import { ObjectItem, SelectInput } from '../../components/SelectInput';
 import { api } from '../../services/api';
+import { modalitiesType } from '../RegisterGame';
 import { BodyModal, ContainerModal, ContainerNameCourt, ContainerTime, CourtImage, TextMotivation, Title, TitleModal } from '../RegisterGame/styles';
+import { typeDependentsPlayers } from '../RegisterGameAfterQueue';
 import {Container, SubTitle} from './styles';
 
 export type modalityTypeQueue = {
@@ -107,7 +110,8 @@ export function RegisterQueue(){
           setModalVisible(false);
           navigator.navigate('home');
         }, 10000);
-    } catch (error) {   
+    } catch (err) {   
+      const error = err as AxiosError<Error>;      
       Alert.alert('Fila de espera', error.response?.data.message);
     }    
   }
@@ -187,7 +191,9 @@ export function RegisterQueue(){
             setRegistrationFourthPlayer(`${registration} - ${response.data.name}`);
           }         
         }          
-      } catch (error) {
+      } catch (err) {
+        const error = err as AxiosError<Error>;
+
         Alert.alert('Matrícula jogador', error.response?.data.message);
         
         if(howsplayer === 'first'){
@@ -235,7 +241,7 @@ export function RegisterQueue(){
     return showDependentsPlayers(dataPlayer, howsplayer);
   }
 
-  function selectDependentPlayer(value, howsplayer: string){
+  function selectDependentPlayer(value: string, howsplayer: string){
     if(howsplayer === 'first'){
       if(value !== ""){
         setIdFirstPlayer(value);
@@ -271,12 +277,14 @@ export function RegisterQueue(){
     }    
   }
 
-  function showDependentsPlayers(dataPlayer, howsplayer: string){
+  function showDependentsPlayers(dataPlayer: string[], howsplayer: string){
     if(dataPlayer.length > 0){
       const newDependentsPlayer = dataPlayer.map((dependentsDataPlayer) => {
+        const  objectDependents: typeDependentsPlayers = Object(dependentsDataPlayer);
+
         return {
-          label: `${dependentsDataPlayer.player.registration} ${dependentsDataPlayer.player.name}`,
-          value: `${dependentsDataPlayer.player.id}`,
+          label: `${objectDependents.player.registration} ${objectDependents.player.name}`,
+          value: `${objectDependents.player.id}`,
         };
       });
     
@@ -284,8 +292,9 @@ export function RegisterQueue(){
         <>
           <Label label="Escolha se você ou algum deles é quem vai jogar?" textColor={true}/>
           <SelectInput 
+            value=''
             placeholder={{ label: 'Eu mesmo vou jogar', value: ''}}
-            fetch={(value) => {selectDependentPlayer(value, howsplayer)}}
+            fetch={(value) => {selectDependentPlayer(String(value), howsplayer)}}
             items={newDependentsPlayer}
           />
         </>
@@ -420,6 +429,7 @@ export function RegisterQueue(){
           <GroupInput>
             <Label label="Modalidade" textColor={false}/>
             <SelectInput 
+              value={modality.id}
               placeholder={{ label: 'Selecione a modalidade', value: '' }} 
               fetch={(id) => {fetchAmountPlayers(id)}}
               items={modalities}

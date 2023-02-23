@@ -21,16 +21,11 @@ type Props = TouchableOpacityProps & {
   id: string,
   name: string,
   reloadCourts: boolean,
-  data: string[],
   reloadFetchCourts: () => void,
   checkQueue: () => void,
 }
 
-type RefCourt = {
-
-}
-
-type courtPropsDTO = {
+export type courtPropsDTO = {
   id: string;
   name: string;
   status: string;
@@ -58,9 +53,10 @@ type PlayersDTO = {
   status: string;
 };
 
-export function Court ({id, name, reloadCourts, reloadFetchCourts, checkQueue, data, ...rest }: Props ){ 
+export function Court ({id, name, reloadCourts, reloadFetchCourts, checkQueue, ...rest }: Props ){ 
   const [gameCurrent, setGameCurrent] = useState<gamePropsDTO>();
   const [players, setPlayers] = useState<PlayersDTO[]>([]);
+  const [noGame, setNoGame] = useState('Sem jogo');
 
   const [statusBarColorCourt, setStatusBarColorCourt] = useState('');
   const [statusCourtBar, setStatusCourtBar] = useState('');
@@ -163,13 +159,18 @@ export function Court ({id, name, reloadCourts, reloadFetchCourts, checkQueue, d
   
     changeStatusGame(diffBetweenDate);
     if(diffBetweenDate === 0){
-      setStatusAvailableCourtAfterCounterResets();
-      setStartDateGame('');
-      setEndDateGame('');
-      reloadFetchCourts();   
-      setTimeGame(0); 
-      setPlayers([]);
-      checkQueue();
+      setNoGame('Jogo acabando...');
+
+      setTimeout(()=> {
+        setStatusAvailableCourtAfterCounterResets();
+        setStartDateGame('');
+        setEndDateGame('');
+        reloadFetchCourts();   
+        setTimeGame(0); 
+        setPlayers([]);
+        checkQueue();
+        setNoGame('Sem jogo');
+      }, 1000);
     }
   }
 
@@ -223,7 +224,7 @@ export function Court ({id, name, reloadCourts, reloadFetchCourts, checkQueue, d
           : <Text>00:00</Text>
         }        
       </ContainerText>            
-      <Text>{timeGame > 0 ? `Tempo restante ${timeGame && timeGame.toString().padStart(2, '0')}:00`: 'Sem jogo'}</Text>
+      <Text>{timeGame > 0 ? `Tempo restante ${timeGame && timeGame.toString().padStart(2, '0')}:00`: noGame}</Text>
     </CourtContainer>
     <StatusBar 
       typeStatusBar={statusCourtBar} 

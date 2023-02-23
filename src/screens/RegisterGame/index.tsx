@@ -17,6 +17,8 @@ import { Alert, Modal, Text } from 'react-native';
 import { TitleInputGroup } from '../../components/FormElement/TitleInputGroup/index';
 import tenisBall from '../../assets/tennisball.png';
 import coutImage from '../../assets/court.png';
+import { typeDependentsPlayers } from "../RegisterGameAfterQueue";
+import { AxiosError } from "axios";
 
 type RouteParams = {
   courtName: string,
@@ -167,7 +169,9 @@ export function RegisterGame(){
             setRegistrationFourthPlayer(`${registration} - ${response.data.name}`);
           }         
         }          
-      } catch (error) {
+      } catch (err) {
+        const error = err as AxiosError<Error>;
+
         Alert.alert('Matrícula jogador', error.response?.data.message);
         
         if(howsplayer === 'first'){
@@ -215,7 +219,7 @@ export function RegisterGame(){
     return showDependentsPlayers(dataPlayer, howsplayer);
   }
 
-  function selectDependentPlayer(value, howsplayer: string){
+  function selectDependentPlayer(value: string, howsplayer: string){
     if(howsplayer === 'first'){
       if(value !== ""){
         setIdFirstPlayer(value);
@@ -251,12 +255,14 @@ export function RegisterGame(){
     }    
   }
 
-  function showDependentsPlayers(dataPlayer, howsplayer: string){
+  function showDependentsPlayers(dataPlayer: string[], howsplayer: string){
     if(dataPlayer.length > 0){
       const newDependentsPlayer = dataPlayer.map((dependentsDataPlayer) => {
+        const  objectDependents: typeDependentsPlayers = Object(dependentsDataPlayer);
+
         return {
-          label: `${dependentsDataPlayer.player.registration} ${dependentsDataPlayer.player.name}`,
-          value: `${dependentsDataPlayer.player.id}`,
+          label: `${objectDependents.player.registration} ${objectDependents.player.name}`,
+          value: `${objectDependents.player.id}`,
         };
       });
     
@@ -264,15 +270,15 @@ export function RegisterGame(){
         <>
           <Label label="Escolha se você ou algum deles é quem vai jogar?" textColor={true}/>
           <SelectInput 
+            value=''
             placeholder={{ label: 'Eu mesmo vou jogar', value: ''}}
-            fetch={(value) => {selectDependentPlayer(value, howsplayer)}}
+            fetch={(value) => {selectDependentPlayer(String(value), howsplayer)}}
             items={newDependentsPlayer}
           />
         </>
       );  
     }    
   }
-
 
   async function handleSaveGameAndPlayers(){
     const playersId: string[] = []; 
@@ -310,7 +316,9 @@ export function RegisterGame(){
           setModalVisible(false);
           navigator.navigate('home');
         }, 20000);
-    } catch (error) {   
+    } catch (err) {   
+      const error = err as AxiosError<Error>;
+
       Alert.alert('Cadastro de jogo', error.response?.data.message);
     }
   }
@@ -457,7 +465,7 @@ export function RegisterGame(){
           <GroupInput>
             <Label label="Modalidade" textColor={false}/>
             <SelectInput 
-              value=""
+              value={modality.id}
               placeholder={{ label: 'Selecione a modalidade', value: '' }} 
               fetch={(id) => {fetchAmountPlayers(id)}}
               items={modalities}

@@ -1,5 +1,6 @@
-import { useRoute, useFocusEffect } from '@react-navigation/native';
+import { useRoute, useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useState, useEffect, useCallback } from 'react';
+import { Alert, Modal, ScrollView } from 'react-native';
 import { AvailableCourt } from '../../components/AvailableCourt';
 import { Button } from '../../components/Button';
 import { Form } from "../../components/FormElement/Form";
@@ -13,23 +14,71 @@ import { NoneModalitySelected } from '../../components/NoneModalitySelected';
 import { ObjectItem, SelectInput } from "../../components/SelectInput";
 import { api } from "../../services/api";
 import { modalitiesType, modalityType } from "../RegisterGame";
+import { Text } from 'react-native';
+import { ObjectCourt, RadioButton } from '../../components/RadioButton';
+import { ButtonCourtsTypeStyleProps } from '../../components/RadioButton/styles';
+import { BodyModal, ContainerModal, ContainerNameCourt, ContainerTime, TextMotivation, Title, TitleModal, Image } from '../RegisterGame/styles';
+import { AxiosError } from 'axios';
+import { CourtImage } from '../../components/Court/style';
+import tenisBall from '../../assets/tennisball.png';
+import coutImage from '../../assets/court.png';
 
 type RouteParams = {
   queueId: string,
 }
 
-type ObjectQueue = {
+export type ObjectQueue = {
   id: string,
   modality_id: string,
   played: string,
   players: string[]
 }
 
+export type typePlayers = {
+  id: string, 
+  name: string,
+  registration: string
+}
+
+export type typeCourts = {
+  id: string,
+};
+
+export type typeDependentsPlayers = {
+  player: {
+    id: string,
+    registration: string,
+    name: string,
+  }
+}
+
+export type newDependentsPlayer = {
+  label: string,
+  value: string,
+};
+
+export interface Error {
+  message: string;
+  statusCode: number;
+}
+
 export function RegisterGameWithQueue(){
   const route = useRoute();
+  const navigator = useNavigation();
+
   const { queueId } = route.params as RouteParams;
 
-  const [queue, setQueue] = useState<ObjectQueue>({});
+  const [queue, setQueue] = useState<ObjectQueue>({
+    id: "",
+    modality_id: "",
+    played: "",
+    players: [] 
+  });
+
+  const [passTurnToSecondQueueId, setPassTurnToSecondQueueId] = useState('');
+
+  const [courtsAvailable, setCourtsAvailable] = useState<ObjectCourt[]>([]);
+  const [nameCourt, setNameCourt] = useState('');
   const [modalities, setModalities] = useState<ObjectItem[]>([]);
   const [modality, setModality] = useState<modalityType>({
     id: "",
@@ -42,32 +91,99 @@ export function RegisterGameWithQueue(){
   const [registrationFirstPlayer, setRegistrationFirstPlayer] = useState<string>("");
   const [idFirstPlayer, setIdFirstPlayer] = useState<string>("");
   const [idFirstOriginalPlayer, setIdFirstOriginalPlayer] = useState<string>("");  
-  const [dataFirstPlayer, setDataFirstPlayer] = useState<string[]>([]);
+  const [dataFirstPlayer, setDataFirstPlayer] = useState([]);
 
   const [registrationSecondPlayer, setRegistrationSecondPlayer] = useState<string>("");
   const [idSecondPlayer, setIdSecondPlayer] = useState<string>("");
   const [idSecondOriginalPlayer, setIdSecondOriginalPlayer] = useState<string>("");  
-  const [dataSecondPlayer, setDataSecondPlayer] = useState<string[]>([]);
+  const [dataSecondPlayer, setDataSecondPlayer] = useState([]);
 
   const [registrationThirdPlayer, setRegistrationThirdPlayer] = useState<string>("");
   const [idThirdPlayer, setIdThirdPlayer] = useState<string>("");
   const [idThirdOriginalPlayer, setIdThirdOriginalPlayer] = useState<string>("");  
-  const [dataThirdPlayer, setDataThirdPlayer] = useState<string[]>([]);
+  const [dataThirdPlayer, setDataThirdPlayer] = useState([]);
 
   const [registrationFourthPlayer, setRegistrationFourthPlayer] = useState<string>("");
   const [idFourthPlayer, setIdFourthPlayer] = useState<string>("");
   const [idFourthOriginalPlayer, setIdFourthOriginalPlayer] = useState<string>("");  
-  const [dataFourthPlayer, setDataFourthPlayer] = useState<string[]>([]);
+  const [dataFourthPlayer, setDataFourthPlayer] = useState([]);
   
   const [modalVisible, setModalVisible] = useState(false);
+  const [modalVisibleGame, setModalVisibleGame] = useState(false);
   const [counter, setCounter] = useState(10 * 60);
+  const [courtId, setCourtId] = useState('');
 
   const minutes = Math.floor(counter / 60);
   const seconds = counter % 60;
 
+  async function fetchCountQueues(){
+    const response = await api.get(`queue/`);
+
+    if(response.data.length > 1){
+      setModalVisible(true);
+
+      response.data.map((queue: ObjectQueue, key: number) => {
+        if(key  === 1){
+          setPassTurnToSecondQueueId(queue.id);
+        }
+      });
+    }
+  }
+
   async function fetchQueue(){
     const response = await api.get(`queue/${queueId}`);
-    setQueue(response.data)
+    setQueue(response.data);
+
+    response.data.players.map((player: typePlayers, key: number) => {
+      if(key === 0){
+        setRegistrationFirstPlayer(`${player.registration} - ${player.name}`);
+        setIdFirstOriginalPlayer(player.id);
+        setIdFirstPlayer(player.id);
+      }
+
+      if(key === 1){
+        setRegistrationSecondPlayer(`${player.registration} - ${player.name}`);
+        setIdSecondOriginalPlayer(player.id);
+        setIdSecondPlayer(player.id);
+      }
+
+        if(key === 2){
+          setRegistrationThirdPlayer(`${player.registration} - ${player.name}`);
+          setIdThirdOriginalPlayer(player.id);
+          setIdThirdPlayer(player.id);  
+        }
+  
+        if(key === 3){
+          setRegistrationFourthPlayer(`${player.registration} - ${player.name}`);
+          setIdFourthOriginalPlayer(player.id);
+          setIdFourthPlayer(player.id);  
+        }  
+    });
+  }
+
+  async function fetchCourts(){
+
+    const response = await api.get(`courts/`);
+
+    const courts = await Promise.all(
+      response.data.list.map(async (court: typeCourts) => {
+    
+        const gameAlredy = await api.get(`/games/game-court-current/${court.id}`);
+    
+        let haveGame = '';        
+    
+        if(!gameAlredy.data.game){
+          haveGame = 'no';
+        }
+
+        return {
+          ...court,
+          game: haveGame
+        }  
+      })  
+    );
+
+    setCourtsAvailable(courts);
   }
 
   async function fetchModalities(){
@@ -85,8 +201,6 @@ export function RegisterGameWithQueue(){
   
   async function fetchAmountPlayers(id: object){
     const modalitId = String(id);
-
-    console.log(id);
 
     if(modalitId !== ""){
       const response = await api.get(`/modalities/${id}`);
@@ -160,7 +274,8 @@ export function RegisterGameWithQueue(){
             setRegistrationFourthPlayer(`${registration} - ${response.data.name}`);
           }         
         }          
-      } catch (error) {
+      } catch (err) {
+        const error = err as AxiosError<Error>;
         Alert.alert('Matrícula jogador', error.response?.data.message);
         
         if(howsplayer === 'first'){
@@ -203,12 +318,11 @@ export function RegisterGameWithQueue(){
 
     if(howsplayer === "fourth"){
       dataPlayer = dataFourthPlayer;
-    }     
-    
+    }         
     return showDependentsPlayers(dataPlayer, howsplayer);
   }
 
-  function selectDependentPlayer(value, howsplayer: string){
+  function selectDependentPlayer(value: string, howsplayer: string){
     if(howsplayer === 'first'){
       if(value !== ""){
         setIdFirstPlayer(value);
@@ -236,20 +350,21 @@ export function RegisterGameWithQueue(){
     if(howsplayer === "fourth"){
       if(value !== ""){
         setIdFourthPlayer(value);
-        console.log(value);
       }else{
-        console.log(idFourthOriginalPlayer);
         setIdFourthPlayer(idFourthOriginalPlayer);
       }
     }    
   }
 
-  function showDependentsPlayers(dataPlayer, howsplayer: string){
+  function showDependentsPlayers(dataPlayer: string[], howsplayer: string){
+
     if(dataPlayer.length > 0){
-      const newDependentsPlayer = dataPlayer.map((dependentsDataPlayer) => {
+      const newDependentsPlayer: newDependentsPlayer[] = dataPlayer.map((dependentsDataPlayer) => {
+        const  objectDependents: typeDependentsPlayers = Object(dependentsDataPlayer);
+
         return {
-          label: `${dependentsDataPlayer.player.registration} ${dependentsDataPlayer.player.name}`,
-          value: `${dependentsDataPlayer.player.id}`,
+          label: `${objectDependents.player.registration} ${objectDependents.player.name}`,
+          value: `${objectDependents.player.id}`,
         };
       });
     
@@ -259,16 +374,12 @@ export function RegisterGameWithQueue(){
           <SelectInput 
             value=''
             placeholder={{ label: 'Eu mesmo vou jogar', value: ''}}
-            fetch={(value) => {selectDependentPlayer(value, howsplayer)}}
+            fetch={(value) => {selectDependentPlayer(String(value), howsplayer)}}
             items={newDependentsPlayer}
           />
         </>
       );  
     }    
-  }
-
-  function handleSaveGameAfterQueue(){
-    console.log('-');
   }
 
   function renderInicialInputs(){
@@ -366,25 +477,189 @@ export function RegisterGameWithQueue(){
         </Row>
       </>
     );
-  }  
+  } 
+  
+  function handleSetChooseIdCort(id: string, name: string){
+    setCourtId(id);
+    setNameCourt(name);
+  }
+
+  function renderAvailableCourts(){
+    return(
+      <RadioButton 
+        handleSetCourt={(id: string, name: string) => handleSetChooseIdCort(id, name)}
+        data={courtsAvailable}
+      />
+    );
+  }
+
+  function handleKeepGoinGameAfterQueue(){
+    setModalVisible(false);
+  }
+
+  async function handlePassTurn(){    
+    const response = await api.get(`queue/${passTurnToSecondQueueId}`);
+    setQueue(response.data);
+
+    response.data.players.map((player: typePlayers, key: number) => {
+      if(key === 0){
+        setRegistrationFirstPlayer(`${player.registration} - ${player.name}`);
+        setIdFirstOriginalPlayer(player.id);
+        setIdFirstPlayer(player.id);
+      }
+
+      if(key === 1){
+        setRegistrationSecondPlayer(`${player.registration} - ${player.name}`);
+        setIdSecondOriginalPlayer(player.id);
+        setIdSecondPlayer(player.id);
+      }
+
+        if(key === 2){
+          setRegistrationThirdPlayer(`${player.registration} - ${player.name}`);
+          setIdThirdOriginalPlayer(player.id);
+          setIdThirdPlayer(player.id);  
+        }
+  
+        if(key === 3){
+          setRegistrationFourthPlayer(`${player.registration} - ${player.name}`);
+          setIdFourthOriginalPlayer(player.id);
+          setIdFourthPlayer(player.id);  
+        }  
+    }); 
+
+    setModalVisible(false);
+  }
+
+  async function handleSaveGameAfterQueue(){
+    if(!courtId){
+      return Alert.alert('Cadastrode jogo', 'Selecione uma quadra entre as disponíveis para iniciar o jogo')
+    }
+
+    const playersId: string[] = []; 
+
+    if(idFirstPlayer !== undefined && idFirstPlayer !== ""){
+      playersId.push(idFirstPlayer);
+    }
+
+    if(idSecondPlayer !== undefined && idSecondPlayer !== ""){
+      playersId.push(idSecondPlayer);
+    }
+
+    if(idThirdPlayer !== undefined && idThirdPlayer !== ""){
+      playersId.push(idThirdPlayer);
+    }
+
+    if(idFourthPlayer !== undefined && idFourthPlayer !== ""){
+      playersId.push(idFourthPlayer);
+    }
+
+    if(playersId.length === 0){
+      return Alert.alert('Cadastro de jogo', 'Adicione alguns jogadores para criar um jogo');
+    }
+
+    console.log(courtId);
+
+    try {
+        const response = await api.post(`/games/`, {
+          court_id: courtId,
+          modality_id: modality.id,
+          players: playersId          
+        });      
+        setModalVisibleGame(true);
+
+        await api.put(`queue/is-played/${queue.id}`);
+
+        setTimeout(() => {
+          setModalVisibleGame(false);
+          navigator.navigate('home');
+        }, 20000);
+    } catch (err) {   
+      const error = err as AxiosError<Error>;
+console.log('ta batendo aqui');
+      Alert.alert('Cadastro de jogo', error.response?.data.message);
+    }
+  }
 
   useEffect(() => {
     fetchQueue();    
+    fetchCountQueues();
   }, []);
 
   useEffect(() => {
     fetchModalities();    
   }, []);
 
+  useEffect(() => {
+    fetchCourts();    
+  }, []);
+
+  useEffect(() => {
+    if(modalVisibleGame){
+      setTimeout(() => {
+        setCounter(counter - 1);
+      }, 1000);  
+    }
+  });  
+
   return (
    <>
     <Form>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible} 
+        supportedOrientations={['landscape']} 
+      >
+        <ContainerModal>
+          <BodyModal>
+            <TitleModal>Olá, chegou sua hora de jogar.</TitleModal>
+            <TextMotivation>Você pode clicar em continuar para jogar ou passar a vez para o próximo da fila.</TextMotivation>
+            <Row>
+              <Button 
+                title={'Passar a vez'}
+                redButton={true}                
+                onPress={() => handlePassTurn()}
+              />            
+              <Button 
+                title={'Continuar para jogar'}
+                onPress={() => handleKeepGoinGameAfterQueue()}
+              />
+            </Row>
+          </BodyModal>            
+        </ContainerModal>
+      </Modal>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisibleGame} 
+        supportedOrientations={['landscape']} 
+      >
+        <ContainerModal>
+          <BodyModal>
+            <TitleModal>Jogo cadastrado com sucesso!</TitleModal>
+            <ContainerNameCourt>
+              <Title>{nameCourt}</Title>
+              <Image source={tenisBall}/>              
+            </ContainerNameCourt>
+            <CourtImage source={coutImage}/>
+            <TextMotivation>Seu jogo vai começar em 10 minutos, se prepare e dê o seu melhor!</TextMotivation>
+            <ContainerTime>{minutes.toString().padStart(2, "0")}:{seconds.toString().padStart(2, "0")}</ContainerTime>
+          </BodyModal>            
+        </ContainerModal>
+      </Modal>             
       <HeaderRegisterGame 
         title="Cadastro de jogo"
       />  
       <Row>
         <GroupInput>
           <Label label="Selecione a quadra" textColor={false} />
+          <ScrollView
+            horizontal={true}
+          >
+            {
+              renderAvailableCourts()
+            }
+          </ScrollView>
         </GroupInput>
         <GroupInput>
           <Label label="Modalidade" textColor={false}/>
@@ -400,7 +675,7 @@ export function RegisterGameWithQueue(){
         modality.amount_players === '0' ?
         (
           <>
-            <NoneModalitySelected message="Selecione uma quadra para inicia o cadastro"/>
+            <NoneModalitySelected message=""/>
           </>
         ):
         (

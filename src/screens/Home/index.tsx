@@ -1,7 +1,7 @@
 
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import {Header} from '../../components/Header'
-import { ButtonJoinQueue, Container, ContainerQueues, ContainerScroll, Courts, Icon, QueueBox, QueueCol, QueueRow, TextButtonJoinQueue, TextQueue} from './styles';
+import { ButtonJoinQueue, ButtonLeaveQueue, Container, ContainerQueues, ContainerScroll, Courts, Icon, QueueBox, QueueCol, QueueRow, TextButtonJoinQueue, TextButtonLeaveQueue, TextQueue} from './styles';
 import { Court } from '../../components/Court';
 import { api } from '../../services/api';
 import { useCallback, useEffect, useState } from 'react';
@@ -12,10 +12,14 @@ import playersImage from '../../assets/players.png';
 import { Button } from '../../components/Button';
 
 
-type playerMap = {
-  id: number,
+type typePlayerHome = {
   name: string,
 }
+
+type typeCourt = {
+  id: string,
+  name: string
+};
 
 export function Home (){
 
@@ -24,10 +28,9 @@ export function Home (){
   const [queue, setQueue] = useState<queueType[]>([]);
   const [reload, setReload] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [showButton, setShowButton] = useState<boolean>(true);
+  const [showButton, setShowButton] = useState<boolean>(false);
 
   async function fetchCourts(){
-    console.log('executou');
     const response = await api.get('courts');
     setCourts(response.data.list)
   }
@@ -61,12 +64,11 @@ export function Home (){
   }
 
   function handleSendRegisterGameBeforeQueue(id: string){
-    console.log('vou mandar para a página que registra o jogo com todos os dados cadastrados já');
     navigator.navigate('gamequeue', { queueId: id });
   }
 
   function checkQueueExists(){
-    console.log('aaaaaa');
+    console.log('check queue exists');
 
     if(queue.length > 0){
       setShowButton(true);
@@ -74,11 +76,13 @@ export function Home (){
     }
   }
 
-  function renderColumnsQueue(players, id){
+  function renderColumnsQueue(players: string[], id: string, key: number){
     let arrayPlayers: string[] = [];
 
-    players.map(player => {
-      arrayPlayers.push(player.name)
+    players.map((player) => {
+      const newObjectPlayers: typePlayerHome = Object(player);
+
+      arrayPlayers.push(newObjectPlayers.name)
     });
 
     const playersTogether = arrayPlayers.join(' x ')
@@ -90,13 +94,16 @@ export function Home (){
           <QueueCol>{playersTogether}</QueueCol>
           <QueueCol>
             {
-              showButton ? 
-              <TouchableOpacity
-                onPress={() => handleSendRegisterGameBeforeQueue(id)}
-              >
-                <Text>Quadra liberada!</Text>
-              </TouchableOpacity>
-              : 
+              key === 0 ? 
+                showButton ? 
+                <ButtonLeaveQueue
+                  onPress={() => handleSendRegisterGameBeforeQueue(id)}
+                >
+                  <TextButtonLeaveQueue>Quadras liberadas!</TextButtonLeaveQueue>
+                </ButtonLeaveQueue>
+                : 
+                <></>
+              :
               <></>
             }
           </QueueCol>
@@ -105,13 +112,12 @@ export function Home (){
     }
   }
 
-  function renderCourt(court){
+  function renderCourt(court: typeCourt){
     return (
       <Court
         key={court.id}
         id={court.id}
         name={court.name}
-        data={court}
         onPress={() => handleRegister(court.id)}
         reloadCourts={reload}
         reloadFetchCourts={() => fetchCourts()}
@@ -124,6 +130,7 @@ export function Home (){
     setRefreshing(true);
     setTimeout(() => {
       fetchCourts();
+      fetchQueue();
       setReload(true);
       setRefreshing(false);
     }, 2000);
@@ -160,7 +167,7 @@ export function Home (){
         <QueueBox>
           <TextQueue>Fila de espera</TextQueue>
           {
-            queue.map(queue => { return renderColumnsQueue(queue.players, queue.id)})
+            queue.map((queue, key) => { return renderColumnsQueue(queue.players, queue.id, key)})
           }
         </QueueBox>
         <ButtonJoinQueue

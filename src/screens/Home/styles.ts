@@ -1,5 +1,5 @@
 import { StyleSheet, TouchableOpacity } from "react-native"
-import styled from 'styled-components/native';
+import styled, { css } from 'styled-components/native';
 
 
 export const Container = styled.View`
@@ -41,6 +41,7 @@ export const QueueRow = styled.View`
 
 export const QueueCol = styled.Text`
   margin-bottom: 5px;
+  margin: 10px;
   font-size: ${({theme}) => theme.FONT_SIZE.MD}px;
   color: ${({theme}) => theme.COLORS.BLACK_900};
   font-family: ${({theme}) => theme.FONT_FAMILY.SEMIBOLD};  
@@ -77,3 +78,21 @@ export const Icon = styled.Image`
   margin-top: 4px;
   margin-right: 10px;
 `;
+
+
+export const ButtonLeaveQueue = styled(TouchableOpacity)`
+  ${({theme}) => css`
+    background: ${theme.COLORS.BLUE};
+    padding: 4px;
+  `};
+  border-radius: 5px;
+`;
+
+export const TextButtonLeaveQueue = styled.Text`
+  ${({theme}) => css`
+    color: ${theme.COLORS.WHITE};
+    font-family: ${theme.FONT_FAMILY.SEMIBOLD};
+    font-size: 10px;
+  `};
+`;
+
