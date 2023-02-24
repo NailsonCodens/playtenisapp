@@ -10,7 +10,12 @@ import { Alert, RefreshControl, Text, TouchableOpacity } from 'react-native';
 import { queueType } from '../../dtos/queueDTO';
 import playersImage from '../../assets/players.png';
 import { Button } from '../../components/Button';
+import io from 'socket.io-client';
 
+
+let baseURL = 'wss://d0ec-201-15-38-159.ngrok.io';
+
+const socketio = io(baseURL);
 
 type typePlayerHome = {
   name: string,
@@ -31,6 +36,7 @@ export function Home (){
   const [showButton, setShowButton] = useState<boolean>(false);
 
   async function fetchCourts(){
+    console.log('recarregar featchCourts');
     const response = await api.get('courts');
     setCourts(response.data.list)
   }
@@ -74,6 +80,11 @@ export function Home (){
       setShowButton(true);
       console.log('libera botão apenas pro primeiro grupo  da fila de espera.');
     }
+
+    if(queue.length <= 0){
+      setShowButton(false);
+      console.log('esconde o botão pq nao tem mais fila de espera');
+    }    
   }
 
   function renderColumnsQueue(players: string[], id: string, key: number){
@@ -144,6 +155,20 @@ export function Home (){
   useFocusEffect(useCallback(() => {
     fetchQueue();
   }, []));
+
+  const socketio = io('https://3d35-201-15-38-159.ngrok.io');
+
+  useEffect(() => {
+    console.log('carregando')
+    socketio.on("messageResponse", (data) => {
+      fetchCourts();
+      fetchQueue();
+    });
+
+    return () => {
+      socketio.off('hello')
+    }    
+  }, [socketio, fetchCourts, fetchQueue]);
 
   return(
     <Container>

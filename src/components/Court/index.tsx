@@ -170,7 +170,7 @@ export function Court ({id, name, reloadCourts, reloadFetchCourts, checkQueue, .
         setPlayers([]);
         checkQueue();
         setNoGame('Sem jogo');
-      }, 1000);
+      }, 60500);
     }
   }
 
