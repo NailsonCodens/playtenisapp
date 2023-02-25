@@ -11,11 +11,9 @@ import { queueType } from '../../dtos/queueDTO';
 import playersImage from '../../assets/players.png';
 import { Button } from '../../components/Button';
 import io from 'socket.io-client';
+import { Court2, DataObject } from '../../components/Court2';
+import socketio from '../../services/socket.io';
 
-
-let baseURL = 'wss://d0ec-201-15-38-159.ngrok.io';
-
-const socketio = io(baseURL);
 
 type typePlayerHome = {
   name: string,
@@ -23,7 +21,9 @@ type typePlayerHome = {
 
 type typeCourt = {
   id: string,
-  name: string
+  name: string,
+  status: string,
+  game: DataObject
 };
 
 export function Home (){
@@ -34,9 +34,9 @@ export function Home (){
   const [reload, setReload] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [showButton, setShowButton] = useState<boolean>(false);
+  const [reloadCourtsSocket, setReloadCourtsSocket] = useState<boolean>(false);
 
   async function fetchCourts(){
-    console.log('recarregar featchCourts');
     const response = await api.get('courts');
     setCourts(response.data.list)
   }
@@ -124,17 +124,34 @@ export function Home (){
   }
 
   function renderCourt(court: typeCourt){
+    {
+      /*
+        
+      */
+    }
+
     return (
       <Court
-        key={court.id}
-        id={court.id}
+      key={court.id}
+      id={court.id}
+      name={court.name}
+      onPress={() => handleRegister(court.id)}
+      reloadCourts={reload}
+      reloadFetchCourts={() => fetchCourts()}
+      checkQueue={() => checkQueueExists()}
+    />  
+    );
+
+    /*
+    return (
+      <Court2 
+        key={court.id} 
+        data={court.game} 
+        status={court.status} 
         name={court.name}
-        onPress={() => handleRegister(court.id)}
-        reloadCourts={reload}
-        reloadFetchCourts={() => fetchCourts()}
-        checkQueue={() => checkQueueExists()}
-    />      
-    );    
+        court={court}
+        />
+    );*/
   }
 
   const onRefresh = useCallback(() => {
@@ -156,19 +173,25 @@ export function Home (){
     fetchQueue();
   }, []));
 
-  const socketio = io('https://3d35-201-15-38-159.ngrok.io');
+  async function reloadFetchCourts(data){
+    const response = await api.get('courts');
+    setReload(true);
+    setCourts(response.data.list)
+  }
 
   useEffect(() => {
-    console.log('carregando')
     socketio.on("messageResponse", (data) => {
-      fetchCourts();
-      fetchQueue();
+      setReload(true);
+      reloadFetchCourts(data);
+      setReload(false);
     });
 
     return () => {
       socketio.off('hello')
-    }    
-  }, [socketio, fetchCourts, fetchQueue]);
+      socketio.off('messageResponse')
+      setReload(false);
+    }   
+  }, [socketio, reloadCourtsSocket]);
 
   return(
     <Container>

@@ -17,19 +17,39 @@ import { statusCourtText } from '../../utils/statusCourtText';
 import { statusGame } from '../../utils/statusGame';
 import { useFocusEffect } from '@react-navigation/native';
 
-type Props = TouchableOpacityProps & {
+
+export type DataObject = {
   id: string,
+  date_game: string,
+  court_id: string,
+  modality_id: string,
+  start_time_game: string,
+  end_time_game: string,
+  time: string
+  players: Array<PlayersDTO>,
+  modality: {
+    id: string,
+    name: string,
+    amount_players: number, 
+    time: string,
+    status: string
+  }
+};
+
+type Props = TouchableOpacityProps & {
+  data: DataObject,
+  status: string,
   name: string,
-  reloadCourts: boolean,
-  reloadFetchCourts: () => void,
-  checkQueue: () => void,
+  court: courtPropsDTO
 }
 
-export type courtPropsDTO = {
+type PlayersDTO = {
   id: string;
+  type: string;
   name: string;
+  registration: string;
   status: string;
-}
+};
 
 type gamePropsDTO = {
   start_time_game: string,
@@ -45,45 +65,37 @@ type gamePropsDTO = {
   ]
 };
 
-type PlayersDTO = {
+export type courtPropsDTO = {
   id: string;
-  type: string;
   name: string;
-  registration: string;
   status: string;
-};
+}
 
-export function Court ({id, name, reloadCourts, reloadFetchCourts, checkQueue, ...rest }: Props ){ 
-
-  
-  const [gameCurrent, setGameCurrent] = useState<gamePropsDTO>();
+export function Court2 ({data, status, name, court, ...rest }: Props ){ 
+  const [dataGame, setDataGame] = useState<DataObject>(data);
   const [players, setPlayers] = useState<PlayersDTO[]>([]);
+  const [startDateGame, setStartDateGame] = useState<string | null>('');
+  const [endDateGame, setEndDateGame] = useState<string | null >('');
+  const [timeGame, setTimeGame] = useState<number>(0);
   const [noGame, setNoGame] = useState('Sem jogo');
-
+  const [dateFinishGame, setDateFinishGame] = useState<string>(new Date().toISOString());
+  const [statusGameBar, setStatusGameBar] = useState(statusGame.available);
   const [statusBarColorCourt, setStatusBarColorCourt] = useState('');
   const [statusCourtBar, setStatusCourtBar] = useState('');
-  const [statusGameBar, setStatusGameBar] = useState(statusGame.available);
 
-  const [dateFinishGame, setDateFinishGame] = useState<string>(new Date().toISOString());
-  const [timeGame, setTimeGame] = useState<number>(0);
-  const [startDateGame, setStartDateGame] = useState('');
-  const [endDateGame, setEndDateGame] = useState('');
-  
-  async function fetchStatusCourt(){
-    console.log('to sendo executado');
-    const response = await api.get(`/games/game-court-current/${id}`);
+  function loadInfoGameCourt(){
+    if(data.start_time_game){
+      setEndDateGame(dayjs(data.end_time_game).locale('pt-br').format('HH:mm'));
+      setStartDateGame(dayjs(data.start_time_game).locale('pt-br').format('HH:mm'));
+    }
 
-    const {game, court} = response.data;
+ 
+    setPlayers(data.players);
 
-    setGameCurrent(game);
-
-    game && game.players && setPlayers(game.players);
-
-    addColorCourtBarAndStatusCourtBar(game, court);
-    mutateDataCourt(game);
+    addColorCourtBarAndStatusCourtBar(data, court);
   }
 
-  function addColorCourtBarAndStatusCourtBar(game: gamePropsDTO, court: courtPropsDTO){
+  function addColorCourtBarAndStatusCourtBar(game: DataObject, court: courtPropsDTO){
     if(!game){
       setStatusBarColorCourt(colorsCourt.available);
       setStatusCourtBar(statusCourtText.available);
@@ -102,34 +114,6 @@ export function Court ({id, name, reloadCourts, reloadFetchCourts, checkQueue, .
     }
   }
 
-  function addDateFinishAndTimeGame(game: gamePropsDTO){
-    setDateFinishGame(game.end_time_game);
-    setTimeGame(game.time);
-  }
-
-  function mutateDataCourt(game: gamePropsDTO){
-    if(game){
-      setEndDateGame(dayjs(game.end_time_game).locale('pt-br').format('HH:mm'));
-      setStartDateGame(dayjs(game.start_time_game).locale('pt-br').format('HH:mm'));
-    }
-  }
-
-  function defineColorBarTextBarAndstatusGame(game: gamePropsDTO){
-    const coach = game.players.find(player => player.type === 'coach');
-
-    if(game.players.length > 0 && coach){
-      setStatusBarColorCourt(colorsCourt.class);
-      setStatusGameBar(statusGame.class);
-      setStatusCourtBar(statusCourtText.inUse);
-
-    }else{
-      setStatusCourtBar(statusCourtText.inUse);
-      setStatusBarColorCourt(colorsCourt.inUse); 
-
-      changeStatusGame(game.time);
-    }    
-  }
-
   function changeStatusGame(time: number){
     
     if(time <= 16){
@@ -145,18 +129,12 @@ export function Court ({id, name, reloadCourts, reloadFetchCourts, checkQueue, .
     }    
   }
 
-  function setStatusAvailableCourtAfterCounterResets(){
-    setStatusCourtBar(statusCourtText.available);
-    setStatusBarColorCourt(colorsCourt.available);  
-    setStatusGameBar(statusGame.available);
-  }
-
   function CounterTimeGame(){
 
     const dateNow = dayjs();
     const dateGame = dayjs(dateFinishGame);
     const diffBetweenDate = dateGame.diff(dateNow, 'minute');  
-    
+
     setTimeGame(diffBetweenDate);
   
     changeStatusGame(diffBetweenDate);
@@ -164,39 +142,55 @@ export function Court ({id, name, reloadCourts, reloadFetchCourts, checkQueue, .
       setNoGame('Jogo acabando...');
 
       setTimeout(()=> {
-        setStatusAvailableCourtAfterCounterResets();
+        //setStatusAvailableCourtAfterCounterResets();
         setStartDateGame('');
         setEndDateGame('');
-        reloadFetchCourts();   
+        //reloadFetchCourts();   
         setTimeGame(0); 
         setPlayers([]);
-        checkQueue();
+        //checkQueue();
         setNoGame('Sem jogo');
       }, 60500);
     }
   }
 
-  useFocusEffect(useCallback(() => {
-    if(reloadCourts){
-      console.log('recarregue');
-      fetchStatusCourt(); 
+  function defineColorBarTextBarAndstatusGame(game: DataObject){
+    const coach = game.players.find(player => player.type === 'coach');
+
+    if(game.players.length > 0 && coach){
+      setStatusBarColorCourt(colorsCourt.class);
+      setStatusGameBar(statusGame.class);
+      setStatusCourtBar(statusCourtText.inUse);
+
     }else{
-      fetchStatusCourt(); 
-    }
- 
-  }, [reloadCourts]));
+      setStatusCourtBar(statusCourtText.inUse);
+      setStatusBarColorCourt(colorsCourt.inUse); 
+
+      changeStatusGame(Number(game.time));
+    }    
+  }
+
+  function addDateFinishAndTimeGame(game: DataObject){
+    setDateFinishGame(game.end_time_game);
+    setTimeGame(Number(game.time));
+  }
 
   useEffect(() => {
     if(timeGame === 0){
     }else{
       setTimeout(() => {
+        console.log('estou contanto aqui')
         CounterTimeGame();    
       }, 60000)
     }
-  })
+  }, [timeGame])
+
+  useEffect(() => {
+    loadInfoGameCourt();
+  }, [status]);
 
   return(
-  <Container       
+  <Container 
     {...rest}
   >
     <CourtContainer>
@@ -204,7 +198,7 @@ export function Court ({id, name, reloadCourts, reloadFetchCourts, checkQueue, .
         <NameCourt
           weight={'BOLD'}
         >
-          {name}
+          { name }
         </NameCourt>
         <Icon source={tennisBall}/>
       </ContainerText>
@@ -214,7 +208,7 @@ export function Court ({id, name, reloadCourts, reloadFetchCourts, checkQueue, .
         <PlayersCourt>
           {players.length} jogadore(s)
         </PlayersCourt>
-      </ContainerText> 
+      </ContainerText>  
       <ContainerText>
         <Icon source={timeImage}/>   
         {
@@ -224,10 +218,11 @@ export function Court ({id, name, reloadCourts, reloadFetchCourts, checkQueue, .
             >
               {`${startDateGame} até ${endDateGame}`}
             </NameCourt>
-          : <Text>00:00</Text>
+          : <NameCourt weight={'REGULAR'}>00:00</NameCourt>
         }        
-      </ContainerText>            
-      <Text>{timeGame > 0 ? `Tempo restante ${timeGame && timeGame.toString().padStart(2, '0')}:00`: noGame}</Text>
+      </ContainerText> 
+      <Text>{timeGame > 0 ? `Tempo restante ${timeGame && timeGame.toString().padStart(2, '0')}:00`: noGame}</Text>       
+      <Text>{status} {timeGame}</Text>                
     </CourtContainer>
     <StatusBar 
       typeStatusBar={statusCourtBar} 
