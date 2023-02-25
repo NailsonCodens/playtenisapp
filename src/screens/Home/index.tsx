@@ -135,6 +135,7 @@ export function Home (){
       key={court.id}
       id={court.id}
       name={court.name}
+      status={court.status}
       onPress={() => handleRegister(court.id)}
       reloadCourts={reload}
       reloadFetchCourts={() => fetchCourts()}
@@ -180,15 +181,15 @@ export function Home (){
   }
 
   useEffect(() => {
-    socketio.on("messageResponse", (data) => {
+    socketio.on("reloadResponse", (data) => {
       setReload(true);
       reloadFetchCourts(data);
       setReload(false);
     });
 
     return () => {
-      socketio.off('hello')
-      socketio.off('messageResponse')
+      socketio.off('reloadApp')
+      socketio.off('reloadResponse')
       setReload(false);
     }   
   }, [socketio, reloadCourtsSocket]);

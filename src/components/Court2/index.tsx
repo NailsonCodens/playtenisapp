@@ -88,7 +88,6 @@ export function Court2 ({data, status, name, court, ...rest }: Props ){
       setEndDateGame(dayjs(data.end_time_game).locale('pt-br').format('HH:mm'));
       setStartDateGame(dayjs(data.start_time_game).locale('pt-br').format('HH:mm'));
     }
-
  
     setPlayers(data.players);
 
@@ -150,6 +149,8 @@ export function Court2 ({data, status, name, court, ...rest }: Props ){
         setPlayers([]);
         //checkQueue();
         setNoGame('Sem jogo');
+
+        //enviar aqui um push socket io para o webapp avisando que a quadra liberou.
       }, 60500);
     }
   }
@@ -158,10 +159,10 @@ export function Court2 ({data, status, name, court, ...rest }: Props ){
     const coach = game.players.find(player => player.type === 'coach');
 
     if(game.players.length > 0 && coach){
-      setStatusBarColorCourt(colorsCourt.class);
+/*      setStatusBarColorCourt(colorsCourt.class);
       setStatusGameBar(statusGame.class);
       setStatusCourtBar(statusCourtText.inUse);
-
+*/
     }else{
       setStatusCourtBar(statusCourtText.inUse);
       setStatusBarColorCourt(colorsCourt.inUse); 
@@ -179,7 +180,6 @@ export function Court2 ({data, status, name, court, ...rest }: Props ){
     if(timeGame === 0){
     }else{
       setTimeout(() => {
-        console.log('estou contanto aqui')
         CounterTimeGame();    
       }, 60000)
     }
