@@ -98,13 +98,15 @@ export function Court ({id, name, status, reloadCourts, reloadFetchCourts, check
     await AsyncStorage.setItem(`STATUS_COURT_${court.id}`, court.status);
     await AsyncStorage.setItem(`STATUS_GAME_${court.id}`, checkGame);
 
+   
     if(court.status === 'off' && game === null){
       cancelAllStatus();      
     }
 
     if(court.status === 'ok' && game === null){
       cancelAllStatus();      
-    }    
+    } 
+   
 
     addColorCourtBarAndStatusCourtBar(game, court);
     mutateDataCourt(game);
@@ -115,7 +117,7 @@ export function Court ({id, name, status, reloadCourts, reloadFetchCourts, check
     setStatusAvailableCourtAfterCounterResets();
     setStartDateGame('');
     setEndDateGame('');
-    reloadFetchCourts();   
+    /*reloadFetchCourts();*/   
     setTimeGame(0); 
     setPlayers([]);
     setNoGame('Sem jogo');    
@@ -194,7 +196,7 @@ export function Court ({id, name, status, reloadCourts, reloadFetchCourts, check
 
     const statusCortStorage = await AsyncStorage.getItem(`STATUS_COURT_${id}`);
     const statusGame = await AsyncStorage.getItem(`STATUS_GAME_${id}`);
-console.log(statusCortStorage);
+
     if(statusCortStorage !== 'off' && statusGame === 'yes'){
       console.log('executando aqui pq é diferente de off');
       const dateNow = dayjs();
