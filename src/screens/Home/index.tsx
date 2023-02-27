@@ -88,6 +88,7 @@ export function Home (){
   }
 
   function renderColumnsQueue(players: string[], id: string, key: number){
+    console.log(key);
     let arrayPlayers: string[] = [];
 
     players.map((player) => {
@@ -113,9 +114,9 @@ export function Home (){
                   <TextButtonLeaveQueue>Quadras liberadas!</TextButtonLeaveQueue>
                 </ButtonLeaveQueue>
                 : 
-                <></>
+                <><Text>Não ta liberado {showButton}</Text></>
               :
-              <></>
+              <><Text>key não é zero {key}</Text></>
             }
           </QueueCol>
         </QueueRow>  
