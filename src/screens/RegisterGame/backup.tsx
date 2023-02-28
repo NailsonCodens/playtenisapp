@@ -268,7 +268,7 @@ export function RegisterGame(){
     
       return (
         <>
-          <Label label="Escolha se você ou algum deles é quem vai jogar?" textColor={true}/>
+          <Label label="Você tem dependentes, escolha quem vai jogar!" textColor={true}/>
           <SelectInput 
             value=''
             placeholder={{ label: 'Eu mesmo vou jogar', value: ''}}
@@ -300,7 +300,7 @@ export function RegisterGame(){
     }
 
     if(playersId.length === 0){
-      return Alert.alert('Cadastro de jogo', 'Adicione alguns jogadores para criar um jogo');
+      return Alert.alert('Cadastro de jogo', 'Informe a matrícula dos jogadores');
     }
 
     try {

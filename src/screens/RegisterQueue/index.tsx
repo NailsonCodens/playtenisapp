@@ -103,7 +103,7 @@ export function RegisterQueue(){
 
 
     if(playersId.length === 0){
-      return Alert.alert('Fila de espera', 'Adicione alguns jogadores para esperar a próxima quadra livre');
+      return Alert.alert('Fila de espera', 'Adicione os jogadores para entrar na fila de espera');
     }
 
     try {
@@ -315,7 +315,7 @@ export function RegisterQueue(){
 
       return (
         <>
-          <Label label="Escolha se você ou algum deles é quem vai jogar?" textColor={true}/>
+          <Label label="Você tem dependentes, escolha quem vai jogar!" textColor={true}/>
           <SelectInput 
             value={value}
             placeholder={{ label: 'Eu mesmo vou jogar', value: ''}}

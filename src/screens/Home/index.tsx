@@ -53,7 +53,7 @@ export function Home (){
     const {court} = response.data;
 
     if(game){
-      return Alert.alert('Quadras', 'Quadra ocupada. seleciona uma disponível ou entre na fila de espera');
+      return Alert.alert('Quadras', 'Quadra ocupada, veja se tem alguma outra disponível ou entre na fila de espera!');
     }
 
     const { status } = response.data.court;

@@ -396,7 +396,7 @@ export function RegisterGameWithQueue(){
 
       return (
         <>
-          <Label label="Escolha se você ou algum deles é quem vai jogar?" textColor={true}/>
+          <Label label="Você tem dependentes, escolha quem vai jogar!" textColor={true}/>
           <SelectInput 
             value={value}
             placeholder={{ label: 'Eu mesmo vou jogar', value: ''}}
@@ -580,7 +580,7 @@ export function RegisterGameWithQueue(){
     }
 
     if(playersId.length === 0){
-      return Alert.alert('Cadastro de jogo', 'Adicione alguns jogadores para criar um jogo');
+      return Alert.alert('Cadastro de jogo', 'Informe a matrícula dos jogadores');
     }
 
     const checkDuplicity = hasDuplicates(playersId);
@@ -644,7 +644,7 @@ console.log('ta batendo aqui');
         <ContainerModal>
           <BodyModal>
             <TitleModal>Olá, chegou sua hora de jogar.</TitleModal>
-            <TextMotivation>Você pode clicar em continuar para jogar ou passar a vez para o próximo da fila.</TextMotivation>
+            <TextMotivation>continuar para jogar ou passar a vez para o próximo da fila.</TextMotivation>
             <Row>
               <Button 
                 title={'Passar a vez'}
