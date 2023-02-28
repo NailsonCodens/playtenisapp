@@ -22,6 +22,7 @@ import { AxiosError } from 'axios';
 import { CourtImage } from '../../components/Court/style';
 import tenisBall from '../../assets/tennisball.png';
 import coutImage from '../../assets/court.png';
+import { hasDuplicates } from '../../utils/checkDuplicity';
 
 type RouteParams = {
   queueId: string,
@@ -113,15 +114,15 @@ export function RegisterGameWithQueue(){
   const [counter, setCounter] = useState(10 * 60);
   const [courtId, setCourtId] = useState('');
 
+  const [modalityChoose, setModalityChoose] = useState<string>('');
+
   const minutes = Math.floor(counter / 60);
   const seconds = counter % 60;
 
   async function fetchCountQueues(){
     const response = await api.get(`queue/`);
-
     if(response.data.length > 1){
       setModalVisible(true);
-
       response.data.map((queue: ObjectQueue, key: number) => {
         if(key  === 1){
           setPassTurnToSecondQueueId(queue.id);
@@ -133,6 +134,10 @@ export function RegisterGameWithQueue(){
   async function fetchQueue(){
     const response = await api.get(`queue/${queueId}`);
     setQueue(response.data);
+
+
+  setModalityChoose(response.data.modality_id);
+
 
     response.data.players.map((player: typePlayers, key: number) => {
       if(key === 0){
@@ -201,6 +206,8 @@ export function RegisterGameWithQueue(){
   
   async function fetchAmountPlayers(id: object){
     const modalitId = String(id);
+
+    setModalityChoose(String(id));
 
     if(modalitId !== ""){
       const response = await api.get(`/modalities/${id}`);
@@ -368,11 +375,30 @@ export function RegisterGameWithQueue(){
         };
       });
     
+    
+      let value = '';
+
+      if(howsplayer === 'first'){
+        value = idFirstPlayer;
+      }
+
+      if(howsplayer === 'second'){
+        value = idSecondPlayer;
+      }
+
+      if(howsplayer === 'third'){
+        value = idThirdPlayer;
+      }
+      
+      if(howsplayer === 'fourth'){
+        value = idFourthPlayer;
+      }
+
       return (
         <>
           <Label label="Escolha se você ou algum deles é quem vai jogar?" textColor={true}/>
           <SelectInput 
-            value=''
+            value={value}
             placeholder={{ label: 'Eu mesmo vou jogar', value: ''}}
             fetch={(value) => {selectDependentPlayer(String(value), howsplayer)}}
             items={newDependentsPlayer}
@@ -557,7 +583,12 @@ export function RegisterGameWithQueue(){
       return Alert.alert('Cadastro de jogo', 'Adicione alguns jogadores para criar um jogo');
     }
 
-    console.log(courtId);
+    const checkDuplicity = hasDuplicates(playersId);
+
+    if(checkDuplicity){
+      Alert.alert('Cadastro de jogo', 'Você está tentando por um jogador repetido em 2 campos. Revise por favor');  
+    }
+
 
     try {
         const response = await api.post(`/games/`, {
@@ -572,7 +603,7 @@ export function RegisterGameWithQueue(){
         setTimeout(() => {
           setModalVisibleGame(false);
           navigator.navigate('home');
-        }, 20000);
+        }, 3000);
     } catch (err) {   
       const error = err as AxiosError<Error>;
 console.log('ta batendo aqui');
@@ -664,7 +695,7 @@ console.log('ta batendo aqui');
         <GroupInput>
           <Label label="Modalidade" textColor={false}/>
           <SelectInput
-            value={queue.modality_id}
+            value={modalityChoose}
             placeholder={{ label: 'Selecione a modalidade', value: '' }} 
             fetch={(id) => {fetchAmountPlayers(id)}}
             items={modalities}

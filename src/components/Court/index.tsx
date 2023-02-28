@@ -219,7 +219,7 @@ export function Court ({id, name, status, reloadCourts, reloadFetchCourts, check
           setNoGame('Sem jogo');
           AsyncStorage.removeItem(`STATUS_COURT_${id}`);
           AsyncStorage.removeItem(`STATUS_GAME_${id}`);          
-        }, 60500);
+        }, 61000);
       }
     }else{
       console.log('Não posso contar');

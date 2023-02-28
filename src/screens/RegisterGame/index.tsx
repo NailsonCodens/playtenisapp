@@ -11,6 +11,7 @@ import { Button } from "../../components/Button";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import {NoneModalitySelected} from "../../components/NoneModalitySelected";
+import RNPickerSelect from 'react-native-picker-select';
 
 import { api } from "../../services/api";
 import { Alert, Modal, Text } from 'react-native';
@@ -19,6 +20,40 @@ import tenisBall from '../../assets/tennisball.png';
 import coutImage from '../../assets/court.png';
 import { typeDependentsPlayers } from "../RegisterGameAfterQueue";
 import { AxiosError } from "axios";
+import theme from '../../theme';
+import { hasDuplicates } from "../../utils/checkDuplicity";
+
+const pickerStyle = {
+  inputIOS: {
+    fontSize: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#000',
+    borderRadius: theme.BORDER_RADIUS,
+    color: 'black',
+    width: '100%', 
+    height: 52,
+    fontFamily: "Poppins_700Bold"    
+  },
+  placeholder: {
+    color: '#000',
+    fontSize: 16
+  },  
+	inputAndroid: {
+    width: '100%', 
+    fontSize: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#000',
+    borderRadius: theme.BORDER_RADIUS,
+    color: 'black',
+    height: 52,
+    fontFamily: "Poppins_700Bold" 
+	},
+};
+
 
 type RouteParams = {
   courtName: string,
@@ -95,8 +130,9 @@ export function RegisterGame(){
   }
 
   async function fetchAmountPlayers(id: object){
-    const modalitId = String(id);
+    console.log('asdasd');
 
+    const modalitId = String(id);
     if(modalitId !== ""){
       const response = await api.get(`/modalities/${id}`);
       setModality(response.data);
@@ -122,10 +158,10 @@ export function RegisterGame(){
 
     if(howsPLayer === "fourth"){
       registration = registrationFourthPlayer;
-    }        
+    } 
 
     fetchDataPlayers(registration, howsPLayer);
-  }
+  }  
 
   async function fetchDataPlayers(registration: string, howsplayer: string){
     if(registration){
@@ -196,7 +232,7 @@ export function RegisterGame(){
       }  
     }
   }
-
+  
   function showDependentsPlayer(howsplayer: string){
     let dataPlayer: string[] = [];
 
@@ -266,11 +302,29 @@ export function RegisterGame(){
         };
       });
     
+      let value = '';
+
+      if(howsplayer === 'first'){
+        value = idFirstPlayer;
+      }
+
+      if(howsplayer === 'second'){
+        value = idSecondPlayer;
+      }
+
+      if(howsplayer === 'third'){
+        value = idThirdPlayer;
+      }
+      
+      if(howsplayer === 'fourth'){
+        value = idFourthPlayer;
+      }      
+
       return (
         <>
           <Label label="Escolha se você ou algum deles é quem vai jogar?" textColor={true}/>
           <SelectInput 
-            value=''
+            value={value}
             placeholder={{ label: 'Eu mesmo vou jogar', value: ''}}
             fetch={(value) => {selectDependentPlayer(String(value), howsplayer)}}
             items={newDependentsPlayer}
@@ -279,98 +333,7 @@ export function RegisterGame(){
       );  
     }    
   }
-
-  async function handleSaveGameAndPlayers(){
-    const playersId: string[] = []; 
-
-    if(idFirstPlayer !== undefined && idFirstPlayer !== ""){
-      playersId.push(idFirstPlayer);
-    }
-
-    if(idSecondPlayer !== undefined && idSecondPlayer !== ""){
-      playersId.push(idSecondPlayer);
-    }
-
-    if(idThirdPlayer !== undefined && idThirdPlayer !== ""){
-      playersId.push(idThirdPlayer);
-    }
-
-    if(idFourthPlayer !== undefined && idFourthPlayer !== ""){
-      playersId.push(idFourthPlayer);
-    }
-
-    if(playersId.length === 0){
-      return Alert.alert('Cadastro de jogo', 'Adicione alguns jogadores para criar um jogo');
-    }
-
-    try {
-        const response = await api.post(`/games/`, {
-          court_id: idCourt,
-          modality_id: modality.id,
-          players: playersId          
-        });      
-        setModalVisible(true);
-
-        setTimeout(() => {
-          setIdGame('');
-          setModalVisible(false);
-          navigator.navigate('home');
-        }, 20000);
-    } catch (err) {   
-      const error = err as AxiosError<Error>;
-
-      Alert.alert('Cadastro de jogo', error.response?.data.message);
-    }
-  }
-
-  function renderInicialInputs(){
-    return (
-      <>
-        <TitleInputGroup label="Dupla 1°"/>
-        <Row>
-          <GroupInput>
-            <Label label="Matrícula do 1° jogador"  textColor={false}/>
-            <Input 
-              value={registrationFirstPlayer}
-              onEndEditing={() => handleRegistrationPlayer('first')}
-              onChangeText={setRegistrationFirstPlayer}
-              returnKeyType="done"
-              keyboardAppearance="light"
-              keyboardType="numeric"
-            />
-          </GroupInput>
-          <GroupInput>
-            <Label label="Matrícula do 2° jogador" textColor={false}/>
-            <Input
-              value={registrationSecondPlayer}
-              onEndEditing={() => handleRegistrationPlayer('second')}
-              onChangeText={setRegistrationSecondPlayer}
-              returnKeyType="done"
-              keyboardAppearance="light"
-              keyboardType="numeric"                        
-            />
-          </GroupInput>          
-        </Row>
-        <Row>
-          <GroupInput>
-            <>
-              {
-                showDependentsPlayer('first')
-              }        
-            </>
-          </GroupInput>
-          <GroupInput>
-            <>
-              {
-                showDependentsPlayer('second')
-              }          
-            </>
-          </GroupInput>
-        </Row>                  
-      </>      
-    )
-  }
-
+  
   function renderFinalInputsWhenCourtisForPlayers(){
     return(
       <>
@@ -420,6 +383,105 @@ export function RegisterGame(){
     );
   }
 
+  async function handleSaveGameAndPlayers(){
+    const playersId: string[] = []; 
+
+    if(idFirstPlayer !== undefined && idFirstPlayer !== ""){
+      playersId.push(idFirstPlayer);
+    }
+
+    if(idSecondPlayer !== undefined && idSecondPlayer !== ""){
+      playersId.push(idSecondPlayer);
+    }
+
+    if(idThirdPlayer !== undefined && idThirdPlayer !== ""){
+      playersId.push(idThirdPlayer);
+    }
+
+    if(idFourthPlayer !== undefined && idFourthPlayer !== ""){
+      playersId.push(idFourthPlayer);
+    }
+
+    const checkDuplicity = hasDuplicates(playersId);
+
+    if(checkDuplicity){
+      Alert.alert('Cadastro de jogo', 'Você está tentando por um jogador repetido em 2 campos. Revise por favor');  
+    }
+
+    if(playersId.length === 0){
+      return Alert.alert('Cadastro de jogo', 'Adicione alguns jogadores para criar um jogo');
+    }
+
+    try {
+        const response = await api.post(`/games/`, {
+          court_id: idCourt,
+          modality_id: modality.id,
+          players: playersId          
+        });      
+        setModalVisible(true);
+
+        setTimeout(() => {
+          setIdGame('');
+          setModalVisible(false);
+          navigator.navigate('home');
+        }, 3000);
+    } catch (err) {   
+      const error = err as AxiosError<Error>;
+
+      Alert.alert('Cadastro de jogo', error.response?.data.message);
+    }
+  }
+
+  function renderInicialInputs(){
+    return (
+      <>
+        <TitleInputGroup label="Dupla 1°"/>
+        <Row>
+          <GroupInput>
+            <Label label="Matrícula do 1° jogador"  textColor={false}/>
+            <Input 
+              value={registrationFirstPlayer}
+              onEndEditing={() => handleRegistrationPlayer('first')}
+              onChangeText={setRegistrationFirstPlayer}
+              returnKeyType="done"
+              keyboardAppearance="light"
+              keyboardType="numeric"
+            />
+          </GroupInput>
+          <GroupInput>
+            <Label label="Matrícula do 2° jogador" textColor={false}/>
+            <Input
+              value={registrationSecondPlayer}
+              onEndEditing={() => handleRegistrationPlayer('second')}
+              onChangeText={setRegistrationSecondPlayer}
+              returnKeyType="done"
+              keyboardAppearance="light"
+              keyboardType="numeric"                        
+            />
+          </GroupInput>          
+        </Row>
+        <Row>
+          <GroupInput>
+            <>
+              {
+                showDependentsPlayer('first')
+              }        
+            </>
+          </GroupInput>
+          <GroupInput>
+            <>
+              {
+                showDependentsPlayer('second')
+              }        
+            </>
+          </GroupInput>          
+        </Row>                          
+      </>      
+    )
+  }
+
+
+
   useEffect(() => {
     fetchModalities();
   }, []);
@@ -428,7 +490,7 @@ export function RegisterGame(){
     if(modalVisible){
       setTimeout(() => {
         setCounter(counter - 1);
-      }, 1000);  
+      }, 3000);  
     }
   });
 
@@ -476,7 +538,7 @@ export function RegisterGame(){
           modality.amount_players === '0' ?
           (
             <>
-              <NoneModalitySelected message="Selecione uma quadra para inicia o cadastro"/>
+              <NoneModalitySelected message="Selecione a modalidade para inicia o cadastro"/>
             </>
           ):
           (
@@ -501,17 +563,18 @@ export function RegisterGame(){
                   </>
                 )
               }  
-              <Row>
-                <GroupInput>
-                  <Button 
-                    title={'Play'}
-                    onPress={() => handleSaveGameAndPlayers()}
-                  />
-                </GroupInput>
-              </Row>    
+ 
             </>            
           )
-        }                    
+        }  
+        <Row>
+          <GroupInput>
+            <Button 
+              title={'Play'}
+              onPress={() => handleSaveGameAndPlayers()}
+            />
+          </GroupInput>
+        </Row>                          
       </Form>
     </Container>
   )

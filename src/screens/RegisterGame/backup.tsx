@@ -1,26 +1,36 @@
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { AxiosError } from 'axios';
-import { useEffect, useState } from 'react';
-import { Alert, Modal } from 'react-native';
-import { AvailableCourt } from '../../components/AvailableCourt';
-import { Button } from '../../components/Button';
+import { BodyModal, Container, ContainerModal, ContainerNameCourt, ContainerTime, CourtImage, Image, TextMotivation, Title, TitleModal } from "./styles";
+import { HeaderRegisterGame} from "../../components/HeaderRegisterGame";
+import { ObjectItem, SelectInput } from "../../components/SelectInput";
 import { Form } from '../../components/FormElement/Form';
-import { GroupInput } from '../../components/FormElement/GroupInput';
-import { Label } from '../../components/FormElement/Label';
-import { Row } from '../../components/FormElement/Row';
-import { TitleInputGroup } from '../../components/FormElement/TitleInputGroup';
-import { HeaderRegisterGame } from '../../components/HeaderRegisterGame';
-import { Input } from '../../components/InputText';
-import { NoneModalitySelected } from '../../components/NoneModalitySelected';
-import { ObjectItem, SelectInput } from '../../components/SelectInput';
-import { api } from '../../services/api';
-import { hasDuplicates } from '../../utils/checkDuplicity';
-import { modalitiesType } from '../RegisterGame';
-import { BodyModal, ContainerModal, ContainerNameCourt, ContainerTime, CourtImage, TextMotivation, Title, TitleModal } from '../RegisterGame/styles';
-import { typeDependentsPlayers } from '../RegisterGameAfterQueue';
-import {Container, SubTitle} from './styles';
+import { Row } from "../../components/FormElement/Row";
+import { GroupInput } from "../../components/FormElement/GroupInput";
+import { Label } from "../../components/FormElement/Label";
+import { AvailableCourt } from '../../components/AvailableCourt';
+import { Input } from "../../components/InputText";
+import { Button } from "../../components/Button";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { useEffect, useState } from "react";
+import {NoneModalitySelected} from "../../components/NoneModalitySelected";
 
-export type modalityTypeQueue = {
+import { api } from "../../services/api";
+import { Alert, Modal, Text } from 'react-native';
+import { TitleInputGroup } from '../../components/FormElement/TitleInputGroup/index';
+import tenisBall from '../../assets/tennisball.png';
+import coutImage from '../../assets/court.png';
+import { typeDependentsPlayers } from "../RegisterGameAfterQueue";
+import { AxiosError } from "axios";
+
+type RouteParams = {
+  courtName: string,
+  courtId: string,
+}
+
+export type modalitiesType = {
+  name: string,
+  id: string,
+}
+
+export type modalityType = {
 	id: string,
 	name: string,
 	amount_players: string,
@@ -28,18 +38,22 @@ export type modalityTypeQueue = {
 	status: string;  
 }
 
-export function RegisterQueue(){
+export function RegisterGame(){
   const route = useRoute();
   const navigator = useNavigation();
-    
+  
+  const {courtName, courtId} = route.params as RouteParams;
   const [modalities, setModalities] = useState<ObjectItem[]>([]);
-  const [modality, setModality] = useState<modalityTypeQueue>({
+  const [modality, setModality] = useState<modalityType>({
     id: "",
     name: "",
     amount_players: "0",
     time: 0,
     status: "",
   });
+  const [nameCourt, setNameCourt] = useState<string>(courtName);
+  const [idCourt, setIdCourt] = useState<string>(courtId);
+  const [idGame, setIdGame] = useState<string>("");
 
   const [registrationFirstPlayer, setRegistrationFirstPlayer] = useState<string>("");
   const [idFirstPlayer, setIdFirstPlayer] = useState<string>("");
@@ -60,8 +74,12 @@ export function RegisterQueue(){
   const [idFourthPlayer, setIdFourthPlayer] = useState<string>("");
   const [idFourthOriginalPlayer, setIdFourthOriginalPlayer] = useState<string>("");  
   const [dataFourthPlayer, setDataFourthPlayer] = useState<string[]>([]);
-
+  
   const [modalVisible, setModalVisible] = useState(false);
+  const [counter, setCounter] = useState(10 * 60);
+
+  const minutes = Math.floor(counter / 60);
+  const seconds = counter % 60;
 
   async function fetchModalities(){
     const response = await api.get(`/modalities/`);
@@ -76,53 +94,6 @@ export function RegisterQueue(){
     setModalities(newModalities);
   }
 
-  async function handleSaveQueueAndPlayers(){
-    const playersId: string[] = []; 
-
-    if(idFirstPlayer !== undefined && idFirstPlayer !== ""){
-      playersId.push(idFirstPlayer);
-    }
-
-    if(idSecondPlayer !== undefined && idSecondPlayer !== ""){
-      playersId.push(idSecondPlayer);
-    }
-
-    if(idThirdPlayer !== undefined && idThirdPlayer !== ""){
-      playersId.push(idThirdPlayer);
-    }
-
-    if(idFourthPlayer !== undefined && idFourthPlayer !== ""){
-      playersId.push(idFourthPlayer);
-    }
-
-    const checkDuplicity = hasDuplicates(playersId);
-
-    if(checkDuplicity){
-      Alert.alert('Cadastro de jogo', 'Você está tentando por um jogador repetido em 2 campos. Revise por favor');  
-    }
-
-
-    if(playersId.length === 0){
-      return Alert.alert('Fila de espera', 'Adicione alguns jogadores para esperar a próxima quadra livre');
-    }
-
-    try {
-        await api.post(`/queue/`, {
-          modality_id: modality.id,
-          players: playersId          
-        });      
-        setModalVisible(true);
-
-        setTimeout(() => {
-          setModalVisible(false);
-          navigator.navigate('home');
-        }, 3000);
-    } catch (err) {   
-      const error = err as AxiosError<Error>;      
-      Alert.alert('Fila de espera', error.response?.data.message);
-    }    
-  }
-
   async function fetchAmountPlayers(id: object){
     const modalitId = String(id);
 
@@ -130,7 +101,7 @@ export function RegisterQueue(){
       const response = await api.get(`/modalities/${id}`);
       setModality(response.data);
     }
-  }  
+  }
 
   async function handleRegistrationPlayer(player: string){
 
@@ -224,7 +195,7 @@ export function RegisterQueue(){
         }    
       }  
     }
-  }  
+  }
 
   function showDependentsPlayer(howsplayer: string){
     let dataPlayer: string[] = [];
@@ -276,7 +247,9 @@ export function RegisterQueue(){
     if(howsplayer === "fourth"){
       if(value !== ""){
         setIdFourthPlayer(value);
+        console.log(value);
       }else{
+        console.log(idFourthOriginalPlayer);
         setIdFourthPlayer(idFourthOriginalPlayer);
       }
     }    
@@ -293,31 +266,11 @@ export function RegisterQueue(){
         };
       });
     
-    
-      let value = '';
-
-      if(howsplayer === 'first'){
-        value = idFirstPlayer;
-      }
-
-      if(howsplayer === 'second'){
-        value = idSecondPlayer;
-      }
-
-      if(howsplayer === 'third'){
-        value = idThirdPlayer;
-      }
-      
-      if(howsplayer === 'fourth'){
-        value = idFourthPlayer;
-      }
-
-
       return (
         <>
           <Label label="Escolha se você ou algum deles é quem vai jogar?" textColor={true}/>
           <SelectInput 
-            value={value}
+            value=''
             placeholder={{ label: 'Eu mesmo vou jogar', value: ''}}
             fetch={(value) => {selectDependentPlayer(String(value), howsplayer)}}
             items={newDependentsPlayer}
@@ -325,6 +278,49 @@ export function RegisterQueue(){
         </>
       );  
     }    
+  }
+
+  async function handleSaveGameAndPlayers(){
+    const playersId: string[] = []; 
+
+    if(idFirstPlayer !== undefined && idFirstPlayer !== ""){
+      playersId.push(idFirstPlayer);
+    }
+
+    if(idSecondPlayer !== undefined && idSecondPlayer !== ""){
+      playersId.push(idSecondPlayer);
+    }
+
+    if(idThirdPlayer !== undefined && idThirdPlayer !== ""){
+      playersId.push(idThirdPlayer);
+    }
+
+    if(idFourthPlayer !== undefined && idFourthPlayer !== ""){
+      playersId.push(idFourthPlayer);
+    }
+
+    if(playersId.length === 0){
+      return Alert.alert('Cadastro de jogo', 'Adicione alguns jogadores para criar um jogo');
+    }
+
+    try {
+        const response = await api.post(`/games/`, {
+          court_id: idCourt,
+          modality_id: modality.id,
+          players: playersId          
+        });      
+        setModalVisible(true);
+
+        setTimeout(() => {
+          setIdGame('');
+          setModalVisible(false);
+          navigator.navigate('home');
+        }, 20000);
+    } catch (err) {   
+      const error = err as AxiosError<Error>;
+
+      Alert.alert('Cadastro de jogo', error.response?.data.message);
+    }
   }
 
   function renderInicialInputs(){
@@ -426,7 +422,15 @@ export function RegisterQueue(){
 
   useEffect(() => {
     fetchModalities();
-  }, []);  
+  }, []);
+
+  useEffect(() => {
+    if(modalVisible){
+      setTimeout(() => {
+        setCounter(counter - 1);
+      }, 1000);  
+    }
+  });
 
   return(
     <Container>
@@ -438,19 +442,26 @@ export function RegisterQueue(){
       >
         <ContainerModal>
           <BodyModal>
-            <TitleModal>Pronto. Seu jogo está na fila de espera!</TitleModal>
+            <TitleModal>Jogo cadastrado com sucesso!</TitleModal>
             <ContainerNameCourt>
+              <Title>{nameCourt}</Title>
+              <Image source={tenisBall}/>              
             </ContainerNameCourt>
-            <TextMotivation>Você será avisando quando alguma quadra estiver disponível</TextMotivation>
+            <CourtImage source={coutImage}/>
+            <TextMotivation>Seu jogo vai começar em 10 minutos, se prepare e dê o seu melhor!</TextMotivation>
+            <ContainerTime>{minutes.toString().padStart(2, "0")}:{seconds.toString().padStart(2, "0")}</ContainerTime>
           </BodyModal>            
         </ContainerModal>
-      </Modal>  
+      </Modal>      
       <Form>
-        <HeaderRegisterGame 
-          title="Entrar na fila de espera"
-        />
-        <SubTitle>No momento todas as quadras estão ocupadas. Você está entrando na fila de espera.</SubTitle>        
+      <HeaderRegisterGame 
+        title="Cadastro de jogo"
+      />        
         <Row>
+          <GroupInput>
+            <Label label="Quadra Selecionada" textColor={false} />
+            <AvailableCourt court={nameCourt}/>
+          </GroupInput>
           <GroupInput>
             <Label label="Modalidade" textColor={false}/>
             <SelectInput 
@@ -465,7 +476,7 @@ export function RegisterQueue(){
           modality.amount_players === '0' ?
           (
             <>
-              <NoneModalitySelected message="Selecione a modalidade para iniciar o cadastro"/>
+              <NoneModalitySelected message="Selecione uma quadra para inicia o cadastro"/>
             </>
           ):
           (
@@ -489,19 +500,19 @@ export function RegisterQueue(){
                     }
                   </>
                 )
-              }
+              }  
               <Row>
                 <GroupInput>
                   <Button 
-                    title={'Entrar na fila de espera'}
-                    onPress={() => handleSaveQueueAndPlayers()}
+                    title={'Play'}
+                    onPress={() => handleSaveGameAndPlayers()}
                   />
                 </GroupInput>
               </Row>    
             </>            
           )
-        }                     
-      </Form>      
+        }                    
+      </Form>
     </Container>
   )
 }

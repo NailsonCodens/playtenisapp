@@ -88,7 +88,7 @@ export function Home (){
   }
 
   function renderColumnsQueue(players: string[], id: string, key: number){
-    console.log(key);
+
     let arrayPlayers: string[] = [];
 
     players.map((player) => {
@@ -107,7 +107,7 @@ export function Home (){
           <QueueCol>
             {
               key === 0 ? 
-                showButton ? 
+                !showButton? 
                 <ButtonLeaveQueue
                   onPress={() => handleSendRegisterGameBeforeQueue(id)}
                 >
@@ -163,7 +163,7 @@ export function Home (){
       fetchQueue();
       setReload(true);
       setRefreshing(false);
-    }, 2000);
+    }, 1000);
     setReload(false);
   }, []);
 
