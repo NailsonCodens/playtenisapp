@@ -114,9 +114,9 @@ export function Home (){
                   <TextButtonLeaveQueue>Quadras liberadas!</TextButtonLeaveQueue>
                 </ButtonLeaveQueue>
                 : 
-                <><Text>Não ta liberado {showButton}</Text></>
+                <></>
               :
-              <><Text>key não é zero {key}</Text></>
+              <></>
             }
           </QueueCol>
         </QueueRow>  

@@ -3,13 +3,13 @@
     "name": "playtenisapp",
     "slug": "playtenisapp",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "landscape",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#338ADA"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -22,9 +22,11 @@
       "requireFullScreen": true
     },
     "android": {
+      "package": "com.brothers_codens.playtenisapp",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
+        "backgroundColor": "#338ADA"
       }
     },
     "plugins": [
@@ -34,9 +36,14 @@
           "initialOrientation": "LANDSCAPE"
         }
       ]
-    ],        
+    ],
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "a5f65dcd-d50d-4939-a82a-90d68e85ca08"
+      }
     }
   }
 }
