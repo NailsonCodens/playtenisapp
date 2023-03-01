@@ -73,7 +73,8 @@ export function Court ({id, name, status, reloadCourts, reloadFetchCourts, check
   const [timeGame, setTimeGame] = useState<number>(0);
   const [startDateGame, setStartDateGame] = useState('');
   const [endDateGame, setEndDateGame] = useState('');
-  
+  const [modality, setModality] = useState('');
+
   async function fetchStatusCourt(){
     console.log('to sendo executado');
     AsyncStorage.removeItem(`STATUS_COURT_${id}`);
@@ -83,18 +84,20 @@ export function Court ({id, name, status, reloadCourts, reloadFetchCourts, check
 
     const {game, court} = response.data;
 
+
     let checkGame =  'no';
 
     if(game !== null){
       checkGame = 'yes';
+       setModality(game.modality.name);      
     }else{
-      checkGame = 'no';
-    }
+      checkGame = 'no';      
 
-    setGameCurrent(game);
+    }
 
     game && game.players && setPlayers(game.players);
 
+    
     await AsyncStorage.setItem(`STATUS_COURT_${court.id}`, court.status);
     await AsyncStorage.setItem(`STATUS_GAME_${court.id}`, checkGame);
 
@@ -120,7 +123,8 @@ export function Court ({id, name, status, reloadCourts, reloadFetchCourts, check
     /*reloadFetchCourts();*/   
     setTimeGame(0); 
     setPlayers([]);
-    setNoGame('Sem jogo');    
+    setNoGame('Sem jogo'); 
+    setModality('');   
     setHaveGame(false); 
   }
 
@@ -217,6 +221,7 @@ export function Court ({id, name, status, reloadCourts, reloadFetchCourts, check
           setPlayers([]);
           checkQueue();
           setNoGame('Sem jogo');
+          setModality('');
           AsyncStorage.removeItem(`STATUS_COURT_${id}`);
           AsyncStorage.removeItem(`STATUS_GAME_${id}`);          
         }, 61000);
@@ -262,7 +267,7 @@ export function Court ({id, name, status, reloadCourts, reloadFetchCourts, check
       <ContainerText>
         <Icon source={playersImage}/>        
         <PlayersCourt>
-          {players.length} jogadore(s)
+          {modality}
         </PlayersCourt>
       </ContainerText> 
       <ContainerText>

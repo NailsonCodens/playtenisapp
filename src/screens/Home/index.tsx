@@ -231,19 +231,7 @@ export function Home (){
           }                                      
         </Courts>
       </ContainerScroll>
-      <ContainerQueues>
-        <QueueBox>
-          <TextQueue>Fila de espera</TextQueue>
-          {
-            queue.map((queue, key) => { return renderColumnsQueue(queue.players, queue.id, key)})
-          }
-        </QueueBox>
-        <ButtonJoinQueue
-          onPress={handleRegisterQueue}
-        >
-          <TextButtonJoinQueue>Entrar na fila de espera</TextButtonJoinQueue>
-        </ButtonJoinQueue>
-      </ContainerQueues>
+
      </Container>
   )
 }
