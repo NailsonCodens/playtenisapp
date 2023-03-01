@@ -111,7 +111,7 @@ export function RegisterGame(){
   const [dataFourthPlayer, setDataFourthPlayer] = useState<string[]>([]);
   
   const [modalVisible, setModalVisible] = useState(false);
-  const [counter, setCounter] = useState(10 * 60);
+  const [counter, setCounter] = useState(5 * 60);
 
   const minutes = Math.floor(counter / 60);
   const seconds = counter % 60;
@@ -510,7 +510,7 @@ export function RegisterGame(){
               <Image source={tenisBall}/>              
             </ContainerNameCourt>
             <CourtImage source={coutImage}/>
-            <TextMotivation>Seu jogo vai começar em 10 minutos, se prepare e dê o seu melhor!</TextMotivation>
+            <TextMotivation>Seu jogo vai começar em 5 minutos, se prepare e dê o seu melhor!</TextMotivation>
             <ContainerTime>{minutes.toString().padStart(2, "0")}:{seconds.toString().padStart(2, "0")}</ContainerTime>
           </BodyModal>            
         </ContainerModal>
