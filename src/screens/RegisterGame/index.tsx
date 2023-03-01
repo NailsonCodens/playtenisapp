@@ -405,7 +405,7 @@ export function RegisterGame(){
     const checkDuplicity = hasDuplicates(playersId);
 
     if(checkDuplicity){
-      Alert.alert('Cadastro de jogo', 'Você está tentando por um jogador repetido em 2 campos. Revise por favor');  
+      return Alert.alert('Cadastro de jogo', 'Você está tentando por um jogador repetido em 2 campos. Revise por favor');  
     }
 
     if(playersId.length === 0){
@@ -424,7 +424,7 @@ export function RegisterGame(){
           setIdGame('');
           setModalVisible(false);
           navigator.navigate('home');
-        }, 3000);
+        }, 5000);
     } catch (err) {   
       const error = err as AxiosError<Error>;
 
@@ -490,7 +490,7 @@ export function RegisterGame(){
     if(modalVisible){
       setTimeout(() => {
         setCounter(counter - 1);
-      }, 3000);  
+      }, 5000);  
     }
   });
 

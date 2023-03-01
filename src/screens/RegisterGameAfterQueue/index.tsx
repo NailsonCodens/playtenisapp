@@ -586,7 +586,7 @@ export function RegisterGameWithQueue(){
     const checkDuplicity = hasDuplicates(playersId);
 
     if(checkDuplicity){
-      Alert.alert('Cadastro de jogo', 'Você está tentando por um jogador repetido em 2 campos. Revise por favor');  
+      return Alert.alert('Cadastro de jogo', 'Você está tentando por um jogador repetido em 2 campos. Revise por favor');  
     }
 
 
@@ -603,7 +603,7 @@ export function RegisterGameWithQueue(){
         setTimeout(() => {
           setModalVisibleGame(false);
           navigator.navigate('home');
-        }, 3000);
+        }, 5000);
     } catch (err) {   
       const error = err as AxiosError<Error>;
 console.log('ta batendo aqui');
