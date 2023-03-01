@@ -107,7 +107,7 @@ export function Home (){
           <QueueCol>
             {
               key === 0 ? 
-                !showButton? 
+                showButton? 
                 <ButtonLeaveQueue
                   onPress={() => handleSendRegisterGameBeforeQueue(id)}
                 >
