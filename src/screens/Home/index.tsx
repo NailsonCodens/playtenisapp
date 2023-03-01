@@ -35,15 +35,23 @@ export function Home (){
   const [refreshing, setRefreshing] = useState(false);
   const [showButton, setShowButton] = useState<boolean>(false);
   const [reloadCourtsSocket, setReloadCourtsSocket] = useState<boolean>(false);
+  const [countCourtWithGame, setCountCourtWithGame] = useState<number>(0);
 
   async function fetchCourts(){
     const response = await api.get('courts');
+    fetchCount();    
     setCourts(response.data.list)
   }
 
   async function fetchQueue(){
     const response = await api.get('/queue/');
+
     setQueue(response.data)
+  }
+
+  async function fetchCount(){
+    const response = await api.get('/courts/count/with-games');
+    setCountCourtWithGame(response.data);
   }
 
   async function handleRegister(courtId: string){
@@ -56,6 +64,12 @@ export function Home (){
       return Alert.alert('Quadras', 'Quadra ocupada, veja se tem alguma outra disponível ou entre na fila de espera!');
     }
 
+
+    if(!game && queue.length > 0){
+      return Alert.alert('Quadras', 'Tem jogadores na sua frente, entre na fila de espera e aguarde a sua vez!');
+
+    }
+
     const { status } = response.data.court;
 
     if(status === 'off'){
@@ -66,6 +80,10 @@ export function Home (){
   }
 
   function handleRegisterQueue(){
+    if(countCourtWithGame === 0){
+      return Alert.alert('Fila de espera', 'Tem quadra disponível, selecione uma e comece seu jogo agora mesmo!');
+    }
+
     navigator.navigate('queue');
   }
 
