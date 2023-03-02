@@ -138,13 +138,40 @@ export function Home (){
 
     let arrayPlayers: string[] = [];
 
-    players.map((player) => {
+    players.map((player, key) => {
       const newObjectPlayers: typePlayerHome = Object(player);
 
-      arrayPlayers.push(newObjectPlayers.name)
+
+      if(players.length === 2){
+        if(key === 0){
+          arrayPlayers.push(newObjectPlayers.name.split(' ')[0] + ' x ')
+        }
+  
+        if(key === 1){
+          arrayPlayers.push(newObjectPlayers.name.split(' ')[0])
+        }  
+      }else{
+        if(key === 0){
+          arrayPlayers.push(newObjectPlayers.name.split(' ')[0] + ' e ')
+        }
+  
+        if(key === 1){
+          arrayPlayers.push(newObjectPlayers.name.split(' ')[0])
+        }         
+        
+        if(key === 2){
+          arrayPlayers.push(' x ')
+
+          arrayPlayers.push(newObjectPlayers.name.split(' ')[0] + ' e ')
+        }         
+        
+        if(key === 3){
+          arrayPlayers.push(newObjectPlayers.name.split(' ')[0] + '  ')
+        }                 
+      }
     });
 
-    const playersTogether = arrayPlayers.join(' x ')
+    const playersTogether = arrayPlayers
 
     if(playersTogether){
       return (
