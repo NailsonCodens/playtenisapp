@@ -445,7 +445,7 @@ export function RegisterQueue(){
             <TitleModal>Pronto. Seu jogo está na fila de espera!</TitleModal>
             <ContainerNameCourt>
             </ContainerNameCourt>
-            <TextMotivation>Você será avisando quando alguma quadra estiver disponível</TextMotivation>
+            <TextMotivation>Você será avisado quando alguma quadra estiver disponível</TextMotivation>
           </BodyModal>            
         </ContainerModal>
       </Modal>  

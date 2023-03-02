@@ -36,6 +36,7 @@ export function Home (){
   const [showButton, setShowButton] = useState<boolean>(false);
   const [reloadCourtsSocket, setReloadCourtsSocket] = useState<boolean>(false);
   const [countCourtWithGame, setCountCourtWithGame] = useState<number>(0);
+  const [countCourtStatusOk, setCountCourtStatusOk] = useState<number>(0);
 
   async function fetchCourts(){
     const response = await api.get('courts');
@@ -51,7 +52,8 @@ export function Home (){
 
   async function fetchCount(){
     const response = await api.get('/courts/count/with-games');
-    setCountCourtWithGame(response.data);
+    setCountCourtWithGame(response.data.countWithGame);
+    setCountCourtStatusOk(response.data.courtsOk);
   }
 
   async function handleRegister(courtId: string){
@@ -60,10 +62,10 @@ export function Home (){
     const {game} = response.data;
     const {court} = response.data;
 
+
     if(game){
       return Alert.alert('Quadras', 'Quadra ocupada, veja se tem alguma outra disponível ou entre na fila de espera!');
     }
-
 
     if(!game && queue.length > 0){
       return Alert.alert('Quadras', 'Tem jogadores na sua frente, entre na fila de espera e aguarde a sua vez!');
@@ -80,6 +82,11 @@ export function Home (){
   }
 
   function handleRegisterQueue(){
+    if(countCourtStatusOk === 0){
+      return Alert.alert('Fila de espera', 'Todas as quadras estão interditadas no momento, aguarde!');
+    }
+
+
     if(countCourtWithGame === 0){
       return Alert.alert('Fila de espera', 'Tem quadra disponível, selecione uma e comece seu jogo agora mesmo!');
     }
@@ -91,18 +98,40 @@ export function Home (){
     navigator.navigate('gamequeue', { queueId: id });
   }
 
-  function checkQueueExists(){
+  
+  async function checkQueueExists(){
     console.log('check queue exists');
+    const response = await api.get('/courts/count/with-games');
+    setCountCourtWithGame(response.data.countWithGame);
+    setCountCourtStatusOk(response.data.courtsOk);
+    if(queue.length > 0 ){
+      console.log('entrei aqui pq existe queue maior que 0');
+      if(response.data.courtsOk > 0){
+        console.log('entrei aqui pq liberou quadra');
 
-    if(queue.length > 0){
-      setShowButton(true);
-      console.log('libera botão apenas pro primeiro grupo  da fila de espera.');
+        console.log(response.data.courtsOk);
+
+        console.log(response.data.countWithGame);        
+
+        if(response.data.courtsOk === response.data.countWithGame){
+          setShowButton(false);
+          console.log('entrei pq o tanto de quadra livre, é o tanto de quadra com jogo');
+
+          console.log('aciona false no botão pq até tem quadra livre, mas todas estão em jogo');          
+        }else{
+          setShowButton(true);
+
+          console.log('entrei aqui pq eu tenho algumas quadras livres e nem todas estão com jogo, no caso posso jogar meu jogo da fila de espera');
+
+          console.log('libera botão apenas pro primeiro grupo  da fila de espera.');                    
+        }
+      }
     }
 
     if(queue.length <= 0){
       setShowButton(false);
       console.log('esconde o botão pq nao tem mais fila de espera');
-    }    
+    }
   }
 
   function renderColumnsQueue(players: string[], id: string, key: number){
@@ -125,7 +154,7 @@ export function Home (){
           <QueueCol>
             {
               key === 0 ? 
-                showButton? 
+                showButton ? 
                 <ButtonLeaveQueue
                   onPress={() => handleSendRegisterGameBeforeQueue(id)}
                 >
@@ -187,10 +216,12 @@ export function Home (){
 
   useFocusEffect(useCallback(() => {
     fetchCourts();
+    checkQueueExists();
   }, []));
 
   useFocusEffect(useCallback(() => {
     fetchQueue();
+    checkQueueExists();
   }, []));
 
   async function reloadFetchCourts(data){
@@ -203,7 +234,9 @@ export function Home (){
     socketio.on("reloadResponse", (data) => {
       setReload(true);
       reloadFetchCourts(data);
+      fetchQueue();
       setReload(false);
+      checkQueueExists();
     });
 
     return () => {
@@ -217,8 +250,10 @@ export function Home (){
     <Container>
       <Header/>
       <ContainerScroll 
+      /*
         horizontal={true}
         showsHorizontalScrollIndicator={false}
+        */
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }        

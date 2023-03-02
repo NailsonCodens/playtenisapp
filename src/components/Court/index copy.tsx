@@ -184,7 +184,7 @@ export function Court ({id, name, status, reloadCourts, reloadFetchCourts, check
     if(diffBetweenDate === 0){
       setNoGame('Jogo acabando...');
 
-      setTimeout(()=> {
+      setInterval(()=> {
         setStatusAvailableCourtAfterCounterResets();
         setStartDateGame('');
         setEndDateGame('');
@@ -210,7 +210,7 @@ export function Court ({id, name, status, reloadCourts, reloadFetchCourts, check
   useEffect(() => {
     if(timeGame === 0){
     }else{
-      setTimeout(() => {
+      setInterval(() => {
         CounterTimeGame();    
       }, 60000)
     }
