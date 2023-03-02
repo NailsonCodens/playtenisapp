@@ -23,6 +23,7 @@ import { CourtImage } from '../../components/Court/style';
 import tenisBall from '../../assets/tennisball.png';
 import coutImage from '../../assets/court.png';
 import { hasDuplicates } from '../../utils/checkDuplicity';
+import socketio from '../../services/socket.io';
 
 type RouteParams = {
   queueId: string,
@@ -589,7 +590,6 @@ export function RegisterGameWithQueue(){
       return Alert.alert('Cadastro de jogo', 'Você está tentando por um jogador repetido em 2 campos. Revise por favor');  
     }
 
-
     try {
         const response = await api.post(`/games/`, {
           court_id: courtId,
@@ -604,11 +604,22 @@ export function RegisterGameWithQueue(){
           setModalVisibleGame(false);
           navigator.navigate('home');
         }, 5000);
+
+
+        hideModalWebOnSocket();
+
     } catch (err) {   
       const error = err as AxiosError<Error>;
-console.log('ta batendo aqui');
+      console.log('ta batendo aqui');
       Alert.alert('Cadastro de jogo', error.response?.data.message);
     }
+  }
+
+  function hideModalWebOnSocket(){
+    socketio.emit("hideModalWeb", 'sadsadsad');
+
+    socketio.off('hideModalWeb')
+    socketio.off('responseHideModalWeb')      
   }
 
   useEffect(() => {

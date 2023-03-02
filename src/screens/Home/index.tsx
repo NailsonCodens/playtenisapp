@@ -100,7 +100,7 @@ export function Home (){
 
   
   async function checkQueueExists(){
-    console.log('check queue exists');
+
     const response = await api.get('/courts/count/with-games');
     setCountCourtWithGame(response.data.countWithGame);
     setCountCourtStatusOk(response.data.courtsOk);
@@ -125,6 +125,8 @@ export function Home (){
 
           console.log('libera botão apenas pro primeiro grupo  da fila de espera.');                    
         }
+      }else{
+        setShowButton(false); 
       }
     }
 
@@ -255,6 +257,7 @@ export function Home (){
     const response = await api.get('courts');
     setReload(true);
     setCourts(response.data.list)
+    fetchQueue();
   }
 
   useEffect(() => {
@@ -272,6 +275,20 @@ export function Home (){
       setReload(false);
     }   
   }, [socketio, reloadCourtsSocket]);
+
+  useEffect(() => {
+    socketio.on("responseAbleButtonQeue", (data) => {
+      console.log('recebi');
+      Alert.alert('Quadras', 'Quadra liberada!');
+    });
+
+    return () => {
+      socketio.off('responseAbleButtonQeue')
+      socketio.off('AbleButtonQeue')
+      setReload(false);
+    }   
+  }, [socketio, reloadCourtsSocket]);
+
 
   return(
     <Container>
