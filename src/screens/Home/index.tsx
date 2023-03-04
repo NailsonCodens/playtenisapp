@@ -86,7 +86,9 @@ export function Home (){
       return Alert.alert('Fila de espera', 'Todas as quadras estão interditadas no momento, aguarde!');
     }
 
-    if(countCourtStatusOk > 0 && queue.length > 0){
+
+    //ver isso aqui pq acho que countCourtwithgame não é igual a zero
+    if(countCourtStatusOk > 0 && queue.length === 0 && countCourtStatusOk !== countCourtWithGame){
       
       return Alert.alert('Fila de espera', 'Tem quadra disponível, selecione uma e comece seu jogo agora mesmo!');
     }
@@ -185,8 +187,8 @@ export function Home (){
 
     if(playersTogether){
       return (
-        <QueueRow key={playersTogether}>
-          <QueueCol><Icon source={playersImage}/></QueueCol>        
+        <QueueRow key={key}>
+          <QueueCol></QueueCol>        
           <QueueCol>{playersTogether}</QueueCol>
           <QueueCol>
             {
