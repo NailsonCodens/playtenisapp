@@ -86,10 +86,15 @@ export function Home (){
       return Alert.alert('Fila de espera', 'Todas as quadras estão interditadas no momento, aguarde!');
     }
 
-
-    if(countCourtWithGame === 0){
+    if(countCourtStatusOk > 0 && queue.length > 0){
+      
       return Alert.alert('Fila de espera', 'Tem quadra disponível, selecione uma e comece seu jogo agora mesmo!');
     }
+
+/*
+    if(countCourtWithGame === 0){
+      return Alert.alert('Fila de espera', 'Tem quadra disponível, selecione uma e comece seu jogo agora mesmo!');
+    }*/
 
     navigator.navigate('queue');
   }
@@ -100,11 +105,13 @@ export function Home (){
 
   
   async function checkQueueExists(){
+    const responseQueue = await api.get('/queue/');
+
 
     const response = await api.get('/courts/count/with-games');
     setCountCourtWithGame(response.data.countWithGame);
     setCountCourtStatusOk(response.data.courtsOk);
-    if(queue.length > 0 ){
+    if(responseQueue.data.length > 0 ){
       console.log('entrei aqui pq existe queue maior que 0');
       if(response.data.courtsOk > 0){
         console.log('entrei aqui pq liberou quadra');
@@ -126,11 +133,12 @@ export function Home (){
           console.log('libera botão apenas pro primeiro grupo  da fila de espera.');                    
         }
       }else{
+        console.log('entrei aqui pq apesar de ter gente na fila, não tem quadra disponível');
         setShowButton(false); 
       }
     }
 
-    if(queue.length <= 0){
+    if(responseQueue.data.length <= 0){
       setShowButton(false);
       console.log('esconde o botão pq nao tem mais fila de espera');
     }
@@ -239,6 +247,7 @@ export function Home (){
       fetchQueue();
       setReload(true);
       setRefreshing(false);
+      checkQueueExists();
     }, 1000);
     setReload(false);
   }, []);
@@ -278,8 +287,12 @@ export function Home (){
 
   useEffect(() => {
     socketio.on("responseAbleButtonQeue", (data) => {
-      console.log('recebi');
-      Alert.alert('Quadras', 'Quadra liberada!');
+
+      console.log(queue.length);
+
+      checkQueueExists()
+
+      //Alert.alert('Quadras', 'Quadra liberada!');
     });
 
     return () => {
