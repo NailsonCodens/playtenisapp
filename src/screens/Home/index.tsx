@@ -61,8 +61,6 @@ export function Home (){
 
     const {game} = response.data;
     const {court} = response.data;
-
-
     if(game){
       return Alert.alert('Quadras', 'Quadra ocupada, veja se tem alguma outra disponível ou entre na fila de espera!');
     }
@@ -81,14 +79,18 @@ export function Home (){
     navigator.navigate('register', {courtId: courtId, courtName: court.name});
   }
 
-  function handleRegisterQueue(){
-    if(countCourtStatusOk === 0){
+  async function handleRegisterQueue(){
+
+    const responseCount = await api.get('/courts/count/with-games');    
+
+
+    if(responseCount.data.courtsOk === 0){
       return Alert.alert('Fila de espera', 'Todas as quadras estão interditadas no momento, aguarde!');
     }
 
 
     //ver isso aqui pq acho que countCourtwithgame não é igual a zero
-    if(countCourtStatusOk > 0 && queue.length === 0 && countCourtStatusOk !== countCourtWithGame){
+    if(responseCount.data.courtsOk > 0 && queue.length === 0 && responseCount.data.courtsOk !== responseCount.data.countWithGame){
       
       return Alert.alert('Fila de espera', 'Tem quadra disponível, selecione uma e comece seu jogo agora mesmo!');
     }
@@ -102,6 +104,7 @@ export function Home (){
   }
 
   function handleSendRegisterGameBeforeQueue(id: string){
+    
     navigator.navigate('gamequeue', { queueId: id });
   }
 

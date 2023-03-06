@@ -334,7 +334,13 @@ export function RegisterQueue(){
   function renderInicialInputs(){
     return (
       <>
-        <TitleInputGroup label="Dupla 1°"/>
+        {
+          modality.amount_players === '4' ?
+          <TitleInputGroup label="Dupla 1"/>
+          : 
+          (<></>)
+          
+        }
         <Row>
           <GroupInput>
             <Label label="Matrícula do 1° jogador"  textColor={false}/>
@@ -382,7 +388,7 @@ export function RegisterQueue(){
   function renderFinalInputsWhenCourtisForPlayers(){
     return(
       <>
-        <TitleInputGroup label="Dupla 2°"/>
+        <TitleInputGroup label="Dupla 2"/>
         <Row>
           <GroupInput>
             <Label label="Matrícula do 3° jogador" textColor={false}/>
