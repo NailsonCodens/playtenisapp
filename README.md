@@ -13,10 +13,18 @@
 ## Como funciona?
 O App foi construido com a ideia dos alunos poderem cadastrar seus jogos no tablet que fica no totem em frente as quadras, assim trazendo mas organização e eliminando problemas de gerenciamento de jogos. 
 
+
+## Juntando todas as partes
+Para ter um funcionamento completo do projeto, você precisa também, baixar e executar a api e o aplicativo.
+
+<a href="https://github.com/NailsonCodens/playtenis" target="_blank">Api PlayTenis</a>
+<a href="https://github.com/NailsonCodens/playtenisweb" target="_blank">PlayTenis Web</a>
+
+
 ## Tecnologias utilizadas
 O projeto foi desenvolvido usando as linguagens e ferramentas abaixo.
 
-![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white) ![React native](https://img.shields.io/badge/React_Native-333333?style=for-the-badge&logo=react&logoColor=5ED3F3) ![Expo](https://img.shields.io/badge/Expo-000?style=for-the-badge&logo=expo&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white) ![React native](https://img.shields.io/badge/React_Native-333333?style=for-the-badge&logo=react&logoColor=5ED3F3) ![Expo](https://img.shields.io/badge/Expo-000?style=for-the-badge&logo=expo&logoColor=white) ![Socket.io](https://img.shields.io/badge/Socket.io-fff?style=for-the-badge&logo=socket.io&logoColor=000)
 
 ## Como baixar e executar o projeto
 
