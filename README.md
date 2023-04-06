@@ -33,7 +33,7 @@ O projeto foi desenvolvido usando as linguagens e ferramentas abaixo.
 ```
 
 ## Funcionalidades 
-###### Games - Jogos
+###### Jogos
 - [x] Cadastrar jogo
 - [x] Entrar na fila de espera
 
