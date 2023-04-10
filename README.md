@@ -4,7 +4,7 @@
    PlayTenis App
 </h1>
 
-<img title="a title" alt="Alt text" src="https://github.com/NailsonCodens/playtenis/blob/main/prints/9b370146-13ab-4293-a849-240735206c8e.png?raw=true">
+<img title="a title" alt="Alt text" src="https://github.com/NailsonCodens/playtenisapp/blob/main/prints/app.jpeg?raw=true">
 
 
 <div align="center">
