@@ -12,7 +12,7 @@ type Props = {
 export const Container = styled(TouchableOpacity)`
   margin-bottom: 20px;
   margin: 4px;
-  width: 248px;
+  width: 243px;
 `;
 
 export const CourtContainer = styled.View`
